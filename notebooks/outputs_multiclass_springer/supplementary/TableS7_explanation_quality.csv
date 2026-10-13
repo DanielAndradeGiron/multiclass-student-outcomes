@@ -1,0 +1,13 @@
+﻿Measure,Value
+"LIME local R², median (IQR) — All explained students (n = 30)",0.342 (0.288–0.383)
+"LIME local R², median (IQR) — Predicted Dropout (n = 6)",0.649 (0.427–0.682)
+"LIME local R², median (IQR) — Predicted Enrolled (n = 6)",0.364 (0.353–0.380)
+"LIME local R², median (IQR) — Predicted Graduate (n = 18)",0.312 (0.256–0.342)
+"LIME R² ≥ 0.50, n (%)",4 (13%)
+"Local SHAP–LIME Spearman ρ of |attributions|, median (IQR)",0.57 (0.36–0.70)
+"Local SHAP–LIME sign agreement, median",0.90
+"Local SHAP–LIME top-5 overlap (Jaccard), median",0.43
+"SHAP bootstrap Kendall τ with full-sample ranking, median (2.5th–97.5th percentile)",0.96 (0.94–0.98)
+SHAP vs permutation,τ = 0.65; top-10 Jaccard = 0.67
+SHAP vs LIME (aggregated),τ = 0.41; top-10 Jaccard = 0.54
+Permutation vs LIME (aggregated),τ = 0.34; top-10 Jaccard = 0.54

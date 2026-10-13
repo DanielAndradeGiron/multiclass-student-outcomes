@@ -1,0 +1,19 @@
+﻿Panel,Contrast,Metric,Mean difference (95% CI),Corrected t,p,Holm p,P(better),P(ROPE),Verdict
+A. Each candidate versus the calibrated multinomial LR,Soft voting − LR,Macro-F1,+0.025 (+0.013 to +0.037),4.73,0.001,0.009,0.99,0.01,superior (practically relevant)
+A. Each candidate versus the calibrated multinomial LR,XGBoost − LR,Macro-F1,+0.016 (−0.006 to +0.037),1.67,0.130,0.562,0.72,0.27,inconclusive
+A. Each candidate versus the calibrated multinomial LR,LightGBM − LR,Macro-F1,+0.015 (−0.004 to +0.034),1.82,0.103,0.562,0.73,0.27,inconclusive
+A. Each candidate versus the calibrated multinomial LR,Gradient boosting − LR,Macro-F1,+0.013 (−0.003 to +0.028),1.87,0.094,0.562,0.66,0.34,inconclusive
+A. Each candidate versus the calibrated multinomial LR,Stacking − LR,Macro-F1,+0.012 (−0.001 to +0.025),2.09,0.066,0.465,0.64,0.36,inconclusive
+A. Each candidate versus the calibrated multinomial LR,Extra trees − LR,Macro-F1,+0.011 (−0.005 to +0.027),1.55,0.155,0.562,0.55,0.44,inconclusive
+A. Each candidate versus the calibrated multinomial LR,Random forest − LR,Macro-F1,+0.011 (−0.010 to +0.032),1.15,0.279,0.562,0.53,0.44,inconclusive
+A. Each candidate versus the calibrated multinomial LR,CatBoost − LR,Macro-F1,+0.008 (−0.020 to +0.037),0.66,0.529,0.562,0.45,0.46,inconclusive
+A. Each candidate versus the calibrated multinomial LR,Soft voting − LR,MCC,+0.042 (+0.029 to +0.055),7.24,<0.001,<0.001,1.00,0.00,superior (practically relevant)
+A. Each candidate versus the calibrated multinomial LR,Stacking − LR,MCC,+0.037 (+0.021 to +0.053),5.27,<0.001,0.004,1.00,0.00,superior (practically relevant)
+A. Each candidate versus the calibrated multinomial LR,LightGBM − LR,MCC,+0.036 (+0.012 to +0.059),3.38,0.008,0.049,0.98,0.02,superior (practically relevant)
+A. Each candidate versus the calibrated multinomial LR,XGBoost − LR,MCC,+0.032 (+0.007 to +0.057),2.87,0.019,0.093,0.96,0.04,inconclusive
+A. Each candidate versus the calibrated multinomial LR,Gradient boosting − LR,MCC,+0.027 (+0.005 to +0.050),2.78,0.022,0.093,0.94,0.05,inconclusive
+A. Each candidate versus the calibrated multinomial LR,CatBoost − LR,MCC,+0.021 (−0.016 to +0.058),1.30,0.226,0.370,0.74,0.21,inconclusive
+A. Each candidate versus the calibrated multinomial LR,Random forest − LR,MCC,+0.019 (−0.004 to +0.042),1.88,0.093,0.279,0.80,0.19,inconclusive
+A. Each candidate versus the calibrated multinomial LR,Extra trees − LR,MCC,+0.015 (−0.009 to +0.038),1.43,0.185,0.370,0.67,0.31,inconclusive
+B. Meta-ensemble versus its best base learner and the best individual ensemble,Soft voting − XGBoost (best base learner),Macro-F1,+0.009 (−0.006 to +0.025),1.35,0.211,0.422,0.45,0.54,inconclusive
+B. Meta-ensemble versus its best base learner and the best individual ensemble,Stacking − XGBoost (best base learner),Macro-F1,−0.004 (−0.025 to +0.017),−0.39,0.706,0.706,0.09,0.66,inconclusive

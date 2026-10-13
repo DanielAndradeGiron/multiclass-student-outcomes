@@ -75,7 +75,7 @@ def integrity_checks(ctx, fqa: pd.DataFrame) -> dict[str, bool]:
 
 
 def results_draft(ctx) -> str:
-    cfg, ds, best, S, summary = ctx.cfg, ctx.ds, ctx.BEST, ctx.S, ctx.summary
+    cfg, ds, best, summary = ctx.cfg, ctx.ds, ctx.BEST, ctx.summary
     MH, CH, BB, BD, ql, qh = ctx.MH, ctx.CH, ctx.BB, ctx.BD, ctx.ql, ctx.qh
     fr, fam_a, fam_b, ms = ctx.friedman, ctx.famA, ctx.famB, ctx.ms
     N = len(ds.df)
@@ -129,8 +129,10 @@ counts are compared in Table S9; capacity-based prioritisation is reported in Ta
 
 ## RQ3 — Explainability
 {shap_txt}
-Global concordance: {ctx.conc_txt}. LIME status: {ctx.EXPL.get('LIME')}. Fidelity, local agreement and stability are
-reported in Tables S7–S8; a local explanation for a student in the Enrolled class is shown in Fig. 6.
+SHAP–permutation concordance and matched-case, matched-class SHAP–LIME concordance: {ctx.conc_txt}. LIME status:
+{ctx.EXPL.get('LIME')}. Fidelity, local agreement and stability are reported in Tables S7–S8. Fig. 6 shows the local
+SHAP explanation for the prespecified Enrolled case; its LIME surrogate is relegated to Fig. S4 and is not interpreted
+as faithful when its R² is below the prespecified threshold.
 
 ## Sensitivity analyses
 Macro-F1 by prediction horizon: {sens_txt} (Table 9, Fig. 7).

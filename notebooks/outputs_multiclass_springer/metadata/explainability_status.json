@@ -1,0 +1,4 @@
+{
+  "SHAP": "permutation explainer; 200 students; background 100; 145 evaluations per student; bootstrap \u03c4 median 0.96",
+  "LIME": "median R\u00b2 0.342; not reportable (low fidelity)"
+}

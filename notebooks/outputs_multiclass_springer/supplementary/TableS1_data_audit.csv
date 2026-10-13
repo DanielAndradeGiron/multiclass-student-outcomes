@@ -1,0 +1,37 @@
+﻿Variable,Type,Missing,Unique values,Available at,Figure label
+Marital status,nominal,0,6,enrolment,Marital status
+Application mode,nominal,0,18,enrolment,Application mode
+Application order,quantitative,0,8,enrolment,Application order
+Course,nominal,0,17,enrolment,Course
+Daytime/evening attendance,binary,0,2,enrolment,Daytime attendance
+Previous qualification,nominal,0,17,enrolment,Previous qualification
+Previous qualification (grade),quantitative,0,101,enrolment,Previous qualification (grade)
+Nacionality,nominal,0,21,enrolment,Nationality
+Mother's qualification,nominal,0,29,enrolment,Mother's qualification
+Father's qualification,nominal,0,34,enrolment,Father's qualification
+Mother's occupation,nominal,0,32,enrolment,Mother's occupation
+Father's occupation,nominal,0,46,enrolment,Father's occupation
+Admission grade,quantitative,0,620,enrolment,Admission grade
+Displaced,binary,0,2,enrolment,Displaced
+Educational special needs,binary,0,2,enrolment,Educational special needs
+Debtor,binary,0,2,enrolment,Debtor
+Tuition fees up to date,binary,0,2,enrolment,Tuition fees up to date
+Gender,binary,0,2,enrolment,Gender
+Scholarship holder,binary,0,2,enrolment,Scholarship holder
+Age at enrollment,quantitative,0,46,enrolment,Age at enrollment
+International,binary,0,2,enrolment,International
+Curricular units 1st sem (credited),quantitative,0,21,end of 1st semester,CU1 credited
+Curricular units 1st sem (enrolled),quantitative,0,23,end of 1st semester,CU1 enrolled
+Curricular units 1st sem (evaluations),quantitative,0,35,end of 1st semester,CU1 evaluations
+Curricular units 1st sem (approved),quantitative,0,23,end of 1st semester,CU1 approved
+Curricular units 1st sem (grade),quantitative,0,805,end of 1st semester,CU1 grade
+Curricular units 1st sem (without evaluations),quantitative,0,11,end of 1st semester,CU1 without evaluations
+Curricular units 2nd sem (credited),quantitative,0,19,end of 2nd semester,CU2 credited
+Curricular units 2nd sem (enrolled),quantitative,0,22,end of 2nd semester,CU2 enrolled
+Curricular units 2nd sem (evaluations),quantitative,0,30,end of 2nd semester,CU2 evaluations
+Curricular units 2nd sem (approved),quantitative,0,20,end of 2nd semester,CU2 approved
+Curricular units 2nd sem (grade),quantitative,0,786,end of 2nd semester,CU2 grade
+Curricular units 2nd sem (without evaluations),quantitative,0,10,end of 2nd semester,CU2 without evaluations
+Unemployment rate,quantitative,0,10,enrolment,Unemployment rate
+Inflation rate,quantitative,0,9,enrolment,Inflation rate
+GDP,quantitative,0,10,enrolment,GDP

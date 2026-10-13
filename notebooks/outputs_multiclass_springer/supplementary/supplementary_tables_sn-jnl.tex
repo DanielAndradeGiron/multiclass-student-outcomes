@@ -1,0 +1,270 @@
+% Tables for the Springer Nature LaTeX template (sn-jnl.cls). Requires booktabs; landscape tables use
+% sidewaystable (rotating package, loaded by sn-jnl). Bold marks the best value per column.
+\providecommand{\botrule}{\bottomrule}
+
+\begin{table}[!htbp]
+\caption{Predictor audit: type, completeness and time of availability}\label{tab:TableS1_data_audit}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}llccll@{}}
+\toprule
+Variable & Type & Missing & Unique values & Available at & Figure label \\
+\midrule
+Marital status & nominal & 0 & 6 & enrolment & Marital status \\
+Application mode & nominal & 0 & 18 & enrolment & Application mode \\
+Application order & quantitative & 0 & 8 & enrolment & Application order \\
+Course & nominal & 0 & 17 & enrolment & Course \\
+Daytime/evening attendance & binary & 0 & 2 & enrolment & Daytime attendance \\
+Previous qualification & nominal & 0 & 17 & enrolment & Previous qualification \\
+Previous qualification (grade) & quantitative & 0 & 101 & enrolment & Previous qualification (grade) \\
+Nacionality & nominal & 0 & 21 & enrolment & Nationality \\
+Mother's qualification & nominal & 0 & 29 & enrolment & Mother's qualification \\
+Father's qualification & nominal & 0 & 34 & enrolment & Father's qualification \\
+Mother's occupation & nominal & 0 & 32 & enrolment & Mother's occupation \\
+Father's occupation & nominal & 0 & 46 & enrolment & Father's occupation \\
+Admission grade & quantitative & 0 & 620 & enrolment & Admission grade \\
+Displaced & binary & 0 & 2 & enrolment & Displaced \\
+Educational special needs & binary & 0 & 2 & enrolment & Educational special needs \\
+Debtor & binary & 0 & 2 & enrolment & Debtor \\
+Tuition fees up to date & binary & 0 & 2 & enrolment & Tuition fees up to date \\
+Gender & binary & 0 & 2 & enrolment & Gender \\
+Scholarship holder & binary & 0 & 2 & enrolment & Scholarship holder \\
+Age at enrollment & quantitative & 0 & 46 & enrolment & Age at enrollment \\
+International & binary & 0 & 2 & enrolment & International \\
+Curricular units 1st sem (credited) & quantitative & 0 & 21 & end of 1st semester & CU1 credited \\
+Curricular units 1st sem (enrolled) & quantitative & 0 & 23 & end of 1st semester & CU1 enrolled \\
+Curricular units 1st sem (evaluations) & quantitative & 0 & 35 & end of 1st semester & CU1 evaluations \\
+Curricular units 1st sem (approved) & quantitative & 0 & 23 & end of 1st semester & CU1 approved \\
+Curricular units 1st sem (grade) & quantitative & 0 & 805 & end of 1st semester & CU1 grade \\
+Curricular units 1st sem (without evaluations) & quantitative & 0 & 11 & end of 1st semester & CU1 without evaluations \\
+Curricular units 2nd sem (credited) & quantitative & 0 & 19 & end of 2nd semester & CU2 credited \\
+Curricular units 2nd sem (enrolled) & quantitative & 0 & 22 & end of 2nd semester & CU2 enrolled \\
+Curricular units 2nd sem (evaluations) & quantitative & 0 & 30 & end of 2nd semester & CU2 evaluations \\
+Curricular units 2nd sem (approved) & quantitative & 0 & 20 & end of 2nd semester & CU2 approved \\
+Curricular units 2nd sem (grade) & quantitative & 0 & 786 & end of 2nd semester & CU2 grade \\
+Curricular units 2nd sem (without evaluations) & quantitative & 0 & 10 & end of 2nd semester & CU2 without evaluations \\
+Unemployment rate & quantitative & 0 & 10 & enrolment & Unemployment rate \\
+Inflation rate & quantitative & 0 & 9 & enrolment & Inflation rate \\
+GDP & quantitative & 0 & 10 & enrolment & GDP \\
+\botrule
+\end{tabular*}
+\footnotetext{Nominal predictors are integer-coded in the source file and were one-hot encoded within training folds (categories with $<$ 20 training records pooled as infrequent). Time of availability follows the data descriptor (Realinho et al., 2022). Figure label: abbreviation used in the figures (CU1/CU2, curricular units in the first/second semester).}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{Audit of predictor-profile multiplicity}\label{tab:TableS2_profile_audit}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}lc@{}}
+\toprule
+Measure & Value \\
+\midrule
+Records & 4,424 \\
+Distinct predictor profiles & 4,424 \\
+Profiles shared by $\geq$ 2 records & 0 \\
+Records in shared profiles & 0 \\
+Shared profiles with discordant outcomes & 0 \\
+Largest profile size & 1 \\
+\botrule
+\end{tabular*}
+\footnotetext{A profile is the full vector of the 36 predictors. All partitions (holdout, outer and inner cross-validation, calibration and stacking folds) were grouped by profile so that identical profiles never appear on both sides of a split.}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{Audit of the prespecified tolerance-based selection}\label{tab:TableS3_selection_audit}
+\footnotesize
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}llccccl@{}}
+\toprule
+Criterion & Direction & Best & Tolerance & Before & After & Retained models \\
+\midrule
+Macro-F1 & maximise & 0.7246 & 0.005 & 8 & 1 & Soft voting \\
+\botrule
+\end{tabular*}
+\footnotetext{Each criterion retains the candidates within the stated tolerance of the best value among those still eligible.}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{Comparison of calibration methods in repeated nested cross-validation}\label{tab:TableS5_calibration_methods}
+\footnotesize
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}lcccccc@{}}
+\toprule
+Calibration & Macro-F1 & Brier score & Log-loss & ECE (top-label) & Class-wise ECE & ECE (Enrolled) \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Soft voting}} \\
+Uncalibrated & 0.725 & 0.3153 & 0.564 & 0.061 & 0.054 & 0.057 \\
+Temperature scaling & 0.725 & 0.3108 & 0.553 & 0.034 & 0.039 & 0.042 \\
+Isotonic (OvR) $^{\dagger}$ & 0.713 & 0.3099 & 0.561 & 0.033 & 0.036 & 0.037 \\
+Dirichlet (matrix scaling) & 0.708 & 0.3076 & 0.547 & 0.035 & 0.036 & 0.038 \\
+\addlinespace[2pt]
+\multicolumn{7}{@{}l}{\textit{XGBoost}} \\
+Uncalibrated & 0.715 & 0.3141 & 0.558 & 0.042 & 0.043 & 0.045 \\
+Temperature scaling & 0.715 & 0.3138 & 0.557 & 0.039 & 0.041 & 0.043 \\
+Isotonic (OvR) & 0.703 & 0.3124 & 0.565 & 0.034 & 0.038 & 0.040 \\
+Dirichlet (matrix scaling) $^{\dagger}$ & 0.707 & 0.3092 & 0.550 & 0.035 & 0.035 & 0.033 \\
+\addlinespace[2pt]
+\multicolumn{7}{@{}l}{\textit{LightGBM}} \\
+Uncalibrated & 0.715 & 0.3134 & 0.557 & 0.033 & 0.039 & 0.041 \\
+Temperature scaling & 0.715 & 0.3141 & 0.558 & 0.041 & 0.043 & 0.041 \\
+Isotonic (OvR) & 0.709 & 0.3130 & 0.568 & 0.039 & 0.039 & 0.038 \\
+Dirichlet (matrix scaling) $^{\dagger}$ & 0.707 & 0.3089 & 0.549 & 0.032 & 0.035 & 0.034 \\
+\addlinespace[2pt]
+\multicolumn{7}{@{}l}{\textit{Gradient boosting}} \\
+Uncalibrated & 0.713 & 0.3186 & 0.566 & 0.041 & 0.043 & 0.045 \\
+Temperature scaling & 0.713 & 0.3189 & 0.566 & 0.041 & 0.043 & 0.043 \\
+Isotonic (OvR) & 0.703 & 0.3176 & 0.569 & 0.043 & 0.039 & 0.041 \\
+Dirichlet (matrix scaling) $^{\dagger}$ & 0.704 & 0.3144 & 0.558 & 0.036 & 0.036 & 0.033 \\
+\addlinespace[2pt]
+\multicolumn{7}{@{}l}{\textit{Stacking}} \\
+Uncalibrated & 0.712 & 0.3080 & 0.554 & 0.033 & 0.037 & 0.039 \\
+Temperature scaling & 0.712 & 0.3081 & 0.554 & 0.035 & 0.038 & 0.038 \\
+Isotonic (OvR) & 0.709 & 0.3082 & 0.563 & 0.039 & 0.037 & 0.037 \\
+Dirichlet (matrix scaling) $^{\dagger}$ & 0.713 & 0.3084 & 0.553 & 0.036 & 0.036 & 0.033 \\
+\addlinespace[2pt]
+\multicolumn{7}{@{}l}{\textit{Extra trees}} \\
+Uncalibrated & 0.711 & 0.3385 & 0.604 & 0.057 & 0.060 & 0.067 \\
+Temperature scaling & 0.711 & 0.3355 & 0.599 & 0.043 & 0.055 & 0.064 \\
+Isotonic (OvR) $^{\dagger}$ & 0.698 & 0.3253 & 0.589 & 0.036 & 0.036 & 0.034 \\
+Dirichlet (matrix scaling) & 0.683 & 0.3255 & 0.582 & 0.043 & 0.039 & 0.035 \\
+\addlinespace[2pt]
+\multicolumn{7}{@{}l}{\textit{Random forest}} \\
+Uncalibrated & 0.710 & 0.3469 & 0.622 & 0.099 & 0.080 & 0.079 \\
+Temperature scaling & 0.710 & 0.3299 & 0.587 & 0.037 & 0.045 & 0.053 \\
+Isotonic (OvR) & 0.703 & 0.3257 & 0.587 & 0.033 & 0.036 & 0.038 \\
+Dirichlet (matrix scaling) $^{\dagger}$ & 0.698 & 0.3234 & 0.576 & 0.034 & 0.034 & 0.033 \\
+\addlinespace[2pt]
+\multicolumn{7}{@{}l}{\textit{CatBoost}} \\
+Uncalibrated & 0.708 & 0.3252 & 0.575 & 0.041 & 0.045 & 0.052 \\
+Temperature scaling & 0.708 & 0.3245 & 0.574 & 0.039 & 0.044 & 0.047 \\
+Isotonic (OvR) & 0.697 & 0.3213 & 0.579 & 0.039 & 0.037 & 0.033 \\
+Dirichlet (matrix scaling) $^{\dagger}$ & 0.690 & 0.3177 & 0.563 & 0.035 & 0.034 & 0.030 \\
+\addlinespace[2pt]
+\multicolumn{7}{@{}l}{\textit{Logistic regression}} \\
+Uncalibrated & 0.700 & 0.3468 & 0.611 & 0.040 & 0.066 & 0.082 \\
+Temperature scaling & 0.700 & 0.3472 & 0.608 & 0.042 & 0.070 & 0.087 \\
+Isotonic (OvR) & 0.695 & 0.3254 & 0.591 & 0.037 & 0.038 & 0.035 \\
+Dirichlet (matrix scaling) $^{\dagger}$ & 0.694 & 0.3188 & 0.569 & 0.038 & 0.036 & 0.033 \\
+\botrule
+\end{tabular*}
+\footnotetext{Means over outer folds; all methods evaluated on the same validation observations. $^{\dagger}$ Lowest class-wise ECE for the model. Temperature scaling was prespecified as primary because it preserves the predicted class; isotonic regression was fitted one-vs-rest and renormalised; Dirichlet calibration is a multinomial logistic regression on log-probabilities (matrix scaling, L2).}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{Performance and calibration of the frozen Soft voting by subgroup (holdout)}\label{tab:TableS6_subgroups}
+\footnotesize
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}lccccccc@{}}
+\toprule
+Level & n & Macro-F1 (95\% CI) & Recall Dropout & Recall Enrolled & Recall Graduate & Brier score & Class-wise ECE \\
+\midrule
+\multicolumn{8}{@{}l}{\textit{Gender}} \\
+Female & 580 & 0.754 (0.710--0.792) & 0.748 & 0.515 & 0.938 & 0.2883 & 0.038 \\
+Male & 305 & 0.708 (0.655--0.763) & 0.823 & 0.483 & 0.811 & 0.3312 & 0.054 \\
+\addlinespace[2pt]
+\multicolumn{8}{@{}l}{\textit{Scholarship holder}} \\
+No & 674 & 0.740 (0.706--0.777) & 0.821 & 0.522 & 0.863 & 0.3184 & 0.044 \\
+Yes & 211 & 0.678 (0.584--0.772) & 0.500 & 0.381 & 0.987 & 0.2542 & 0.057 \\
+\addlinespace[2pt]
+\multicolumn{8}{@{}l}{\textit{Age at enrolment}} \\
+$>$ 20 years & 357 & 0.766 (0.710--0.817) & 0.877 & 0.517 & 0.891 & 0.2702 & 0.048 \\
+$\leq$ 20 years & 528 & 0.711 (0.667--0.757) & 0.664 & 0.495 & 0.915 & 0.3253 & 0.047 \\
+\addlinespace[2pt]
+\multicolumn{8}{@{}l}{\textit{Displaced}} \\
+No & 413 & 0.782 (0.734--0.829) & 0.893 & 0.507 & 0.917 & 0.2578 & 0.041 \\
+Yes & 472 & 0.697 (0.656--0.739) & 0.648 & 0.500 & 0.900 & 0.3427 & 0.055 \\
+\addlinespace[2pt]
+\multicolumn{8}{@{}l}{\textit{Debtor}} \\
+No & 794 & 0.749 (0.715--0.781) & 0.763 & 0.532 & 0.910 & 0.3006 & 0.040 \\
+Yes & 91 & 0.667 (0.559--0.775) & 0.885 & 0.300 & 0.842 & 0.3244 & 0.103 \\
+\botrule
+\end{tabular*}
+\footnotetext{Exploratory fairness check; levels with n $<$ 30 or without all three classes are not estimated (NE). 95\% CIs from bootstrap resamples stratified by class within the subgroup. Subgroup estimates are imprecise and should not be over-interpreted.}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{Fidelity, agreement and stability of the explanations}\label{tab:TableS7_explanation_quality}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}ll@{}}
+\toprule
+Measure & Value \\
+\midrule
+LIME local R$^{2}$, median (IQR) --- All explained students (n = 30) & 0.342 (0.288--0.383) \\
+LIME local R$^{2}$, median (IQR) --- Predicted Dropout (n = 6) & 0.649 (0.427--0.682) \\
+LIME local R$^{2}$, median (IQR) --- Predicted Enrolled (n = 6) & 0.364 (0.353--0.380) \\
+LIME local R$^{2}$, median (IQR) --- Predicted Graduate (n = 18) & 0.312 (0.256--0.342) \\
+LIME R$^{2}$ $\geq$ 0.50, n (\%) & 4 (13\%) \\
+Local SHAP--LIME Spearman $\rho$ of $|$attributions$|$, median (IQR) & 0.57 (0.36--0.70) \\
+Local SHAP--LIME sign agreement, median & 0.90 \\
+Local SHAP--LIME top-5 overlap (Jaccard), median & 0.43 \\
+SHAP bootstrap Kendall $\tau$ with full-sample ranking, median (2.5th--97.5th percentile) & 0.96 (0.94--0.98) \\
+SHAP vs permutation & $\tau$ = 0.65; top-10 Jaccard = 0.67 \\
+SHAP vs LIME (aggregated) & $\tau$ = 0.41; top-10 Jaccard = 0.54 \\
+Permutation vs LIME (aggregated) & $\tau$ = 0.34; top-10 Jaccard = 0.54 \\
+\botrule
+\end{tabular*}
+\footnotetext{LIME (3,000 perturbations per student; nominal and binary predictors declared categorical) explained the predicted class of students sampled evenly from the three observed classes; explanations are interpretable only if R$^{2}$ $\geq$ 0.50. Local agreement compares SHAP and LIME for the same student, class and frozen model over the predictors selected by LIME.}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{Stability of global importance across the best-performing frozen candidates (permutation importance, holdout)}\label{tab:TableS8_cross_model_stability}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}lcc@{}}
+\toprule
+Comparison & Kendall $\tau$ (all predictors) & Top-10 overlap (Jaccard) \\
+\midrule
+Soft voting vs XGBoost & 0.82 & 1.00 \\
+Soft voting vs LightGBM & 0.80 & 0.82 \\
+\botrule
+\end{tabular*}
+\footnotetext{Kendall $\tau$ over all 36 predictors and overlap of the top-10 predictors between the selected candidate and the next-best candidates in nested cross-validation.}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{Expected versus observed number of students per class on the holdout}\label{tab:TableS9_expected_vs_observed}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}lccc@{}}
+\toprule
+Class & Observed & Expected ($\Sigma$ p) & Expected/observed \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Soft voting (temperature scaling)}} \\
+Dropout & 284 & 278.4 & 0.980 \\
+Enrolled & 159 & 173.9 & 1.094 \\
+Graduate & 442 & 432.7 & 0.979 \\
+\addlinespace[2pt]
+\multicolumn{4}{@{}l}{\textit{Soft voting (uncalibrated)}} \\
+Dropout & 284 & 282.4 & 0.994 \\
+Enrolled & 159 & 187.3 & 1.178 \\
+Graduate & 442 & 415.3 & 0.940 \\
+\addlinespace[2pt]
+\multicolumn{4}{@{}l}{\textit{LR reference}} \\
+Dropout & 284 & 281.0 & 0.989 \\
+Enrolled & 159 & 225.5 & 1.419 \\
+Graduate & 442 & 378.4 & 0.856 \\
+\botrule
+\end{tabular*}
+\footnotetext{Expected counts are sums of predicted probabilities; ratios close to 1 indicate calibration-in-the-large, which determines whether probabilities can be used to plan support capacity.}
+\end{table}
+
+\begin{table}[!htbp]
+\caption{Paired differences between each sensitivity setting and the primary setting (Soft voting, development set)}\label{tab:TableS10_sensitivity_contrasts}
+\small
+\begin{tabular*}{\textwidth}{@{\extracolsep\fill}@{}llccc@{}}
+\toprule
+Contrast & Metric & Mean difference (95\% CI) & p & Holm p \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Prediction horizon}} \\
+Enrolment only vs end of first year & Macro-F1 & $-$0.147 ($-$0.185 to $-$0.109) & $<$0.001 & 0.002 \\
+Enrolment only vs end of first year & Recall (Enrolled) & $-$0.164 ($-$0.351 to +0.023) & 0.072 & 0.144 \\
+Enrolment only vs end of first year & Class-wise ECE & +0.020 ($-$0.003 to +0.043) & 0.074 & 0.297 \\
+Enrolment + 1st semester vs end of first year & Macro-F1 & $-$0.029 ($-$0.058 to +0.000) & 0.048 & 0.144 \\
+Enrolment + 1st semester vs end of first year & Recall (Enrolled) & $-$0.044 ($-$0.129 to +0.041) & 0.224 & 0.224 \\
+Enrolment + 1st semester vs end of first year & Class-wise ECE & +0.008 ($-$0.001 to +0.016) & 0.074 & 0.297 \\
+\addlinespace[2pt]
+\multicolumn{5}{@{}l}{\textit{Imbalance handling}} \\
+Random oversampling vs SMOTENC & Macro-F1 & $-$0.003 ($-$0.022 to +0.017) & 0.713 & 0.713 \\
+Random oversampling vs SMOTENC & Recall (Enrolled) & +0.066 (+0.012 to +0.121) & 0.028 & 0.084 \\
+Random oversampling vs SMOTENC & Class-wise ECE & +0.012 ($-$0.005 to +0.029) & 0.121 & 0.297 \\
+No resampling vs SMOTENC & Macro-F1 & $-$0.014 ($-$0.043 to +0.015) & 0.253 & 0.505 \\
+No resampling vs SMOTENC & Recall (Enrolled) & $-$0.113 ($-$0.171 to $-$0.056) & 0.005 & 0.021 \\
+No resampling vs SMOTENC & Class-wise ECE & $-$0.005 ($-$0.019 to +0.008) & 0.309 & 0.309 \\
+\botrule
+\end{tabular*}
+\footnotetext{Differences (setting $-$ primary) across the same 5 folds; Nadeau--Bengio corrected t test (n\_test/n\_train = 0.25) with Holm adjustment within each metric over the 4 contrasts. For class-wise ECE, negative differences indicate better calibration. Cross-validation folds are not independent, so the tests are approximate.}
+\end{table}
+

@@ -1,0 +1,46 @@
+{
+  "gates": {
+    "split_disjoint": true,
+    "profiles_disjoint_dev_holdout": true,
+    "class_counts_match_source": true,
+    "predict_proba_column_order": true,
+    "split_complete": true,
+    "holdout_hash_unchanged": true,
+    "meta_architecture_passed": true,
+    "stacking_folds_grouped_by_profile": true,
+    "same_validation_rows_across_models": true,
+    "complete_repeated_oof": true,
+    "all_calibration_methods_evaluated": true,
+    "vectorised_metrics_match_sklearn": true,
+    "holdout_probabilities_valid": true,
+    "all_candidates_frozen_and_evaluated": true,
+    "selected_is_candidate_not_reference": true,
+    "frozen_selected_matches": true,
+    "figures_springer_width": true,
+    "figures_max_height_234mm": true,
+    "figures_min_font_7pt": true,
+    "all_passed": true
+  },
+  "information": {
+    "data_sha256_matches_reference": true,
+    "cv_cache_statistics": {
+      "resample_miss": 270,
+      "resample_hit": 3720,
+      "fit_store": 160,
+      "fit_hit": 320
+    },
+    "cv_block_minutes": [
+      54.12,
+      59.91,
+      45.15,
+      50.05,
+      48.66,
+      50.23,
+      42.41,
+      45.61,
+      28.83,
+      39.34
+    ],
+    "workers": 8
+  }
+}

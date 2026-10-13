@@ -2,7 +2,8 @@
 
 Todas las explicaciones se calculan sobre las probabilidades CALIBRADAS del modelo congelado, a nivel de variable
 original y con la misma función de predicción (verificada). SHAP se calcula una sola vez para todos los estudiantes
-explicados (muestra global, casos LIME y caso de la Fig. 6).
+explicados (muestra global, casos LIME y caso de la Fig. 6). La concordancia SHAP–LIME se calcula sobre los mismos
+casos, clases objetivo y predictores seleccionados localmente por LIME.
 """
 
 from __future__ import annotations
@@ -119,6 +120,7 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
     ok_e = np.where((y_hold == 1) & (P_best.argmax(1) == 1))[0]
     CASE = (int(ok_e[np.argmin(np.abs(P_best[ok_e, 1] - np.median(P_best[ok_e, 1])))]) if len(ok_e)
             else int(np.argmax(np.where(y_hold == 1, P_best[:, 1], -1))))
+    cases = np.unique(np.r_[cases, CASE])
     ALL_EX = np.unique(np.r_[EXi, cases, CASE])
     pos_of = {r: i for i, r in enumerate(ALL_EX)}
 
@@ -159,6 +161,8 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
 
     # --- LIME con control de fidelidad y acuerdo local con SHAP ---
     lime_rows, lime_agg, lime_freq = [], np.zeros(len(COLS)), np.zeros(len(COLS))
+    matched_shap_agg = np.zeros(len(COLS))
+    lime_explanations = {}
     lime_df, lime = pd.DataFrame(), None
     if lime_mod is not None:
         try:
@@ -176,10 +180,12 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
                 lw = np.array([wmap[f] for f in fidx])
                 lime_agg[fidx] += np.abs(lw)
                 lime_freq[fidx] += 1
+                lime_explanations[int(i)] = e_
                 row = {"case": int(i), "observed": CLASSES[y_hold[i]], "predicted": CLASSES[lab], "r2": float(sc)}
                 if SV_ALL is not None:
                     s_ = SV_ALL[pos_of[i], :, lab]
                     sw = s_[fidx]
+                    matched_shap_agg[fidx] += np.abs(sw)
                     row.update({
                         "spearman_abs": float(stats.spearmanr(np.abs(sw), np.abs(lw))[0]) if len(fidx) >= 3 else np.nan,
                         "sign_agreement": float(np.mean(np.sign(sw) == np.sign(lw))),
@@ -189,6 +195,8 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
             lime_df.to_csv(ctx.paths.supplementary / "lime_cases.csv", index=False)
             imp["lime_freq"] = lime_freq / len(cases)
             imp["lime_abs"] = lime_agg / len(cases)
+            if SV_ALL is not None:
+                imp["lime_matched_shap_abs"] = matched_shap_agg / len(cases)
             fid = lime_df.r2.to_numpy()
             expl["LIME"] = f"median R² {np.median(fid):.3f}; " + (
                 "reportable" if np.median(fid) >= cfg.lime_min_fidelity else "not reportable (low fidelity)")
@@ -196,6 +204,7 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
             expl["LIME"] = f"failed: {e!r}"
             log.warning("LIME failed: %r", e)
             lime_rows = []
+            lime_explanations.clear()
     else:
         expl["LIME"] = "lime not installed"
 
@@ -215,11 +224,9 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
     conc = []
     if "shap" in imp:
         conc.append(("SHAP vs permutation", kt(imp.shap, imp.perm), jac(topk(imp.shap), topk(imp.perm))))
-        if "lime_abs" in imp:
-            conc.append(("SHAP vs LIME (aggregated)", kt(imp.shap, imp.lime_abs), jac(topk(imp.shap), topk(imp.lime_abs))))
-    if "lime_abs" in imp:
-        conc.append(("Permutation vs LIME (aggregated)", kt(imp.perm, imp.lime_abs),
-                     jac(topk(imp.perm), topk(imp.lime_abs))))
+        if "lime_matched_shap_abs" in imp:
+            conc.append(("SHAP vs LIME (matched cases/classes)", kt(imp.lime_matched_shap_abs, imp.lime_abs),
+                         jac(topk(imp.lime_matched_shap_abs), topk(imp.lime_abs))))
     conc_txt = "; ".join(f"{a}: τ = {num(b, 2)}, top-10 Jaccard = {num(c, 2)}" for a, b, c in conc) or "not computed"
     ctx.conc_txt, ctx.EXPL = conc_txt, expl
     rep.register_table(
@@ -230,7 +237,9 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
         f"bootstrap: share of {cfg.shap_bootstrap} bootstrap resamples of the explained students in which the predictor "
         "ranked in the top 10. Permutation Δ log-loss: increase in multiclass log-loss after permuting the predictor "
         f"({cfg.perm_repeats} repeats; 2.5th–97.5th percentiles). LIME top-10: share of explained students whose local "
-        f"explanation included the predictor. Global concordance — {conc_txt}. Attributions describe the fitted model, "
+        f"explanation included the predictor. SHAP–LIME concordance uses the same LIME cases and predicted classes, "
+        "aggregating SHAP absolute values only for features selected in each corresponding LIME explanation. "
+        f"Concordance — {conc_txt}. Attributions describe the fitted model, "
         "not causal effects; correlated curricular-unit variables share attribution", landscape=True)
     s7 = []
     if lime_rows:
@@ -242,6 +251,12 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
         s7.append({"Measure": f"LIME R² ≥ {cfg.lime_min_fidelity:.2f}, n (%)",
                    "Value": f"{int((lime_df.r2 >= cfg.lime_min_fidelity).sum())} "
                             f"({(lime_df.r2 >= cfg.lime_min_fidelity).mean():.0%})"})
+        case_lime = lime_df.loc[lime_df.case == CASE, "r2"]
+        if not case_lime.empty:
+            case_r2 = float(case_lime.iloc[0])
+            s7.append({"Measure": "LIME local R² — illustrative Enrolled case",
+                       "Value": f"{case_r2:.3f} ({'meets' if case_r2 >= cfg.lime_min_fidelity else 'below'} "
+                                f"the {cfg.lime_min_fidelity:.2f} fidelity threshold)"})
         if "spearman_abs" in lime_df:
             s7 += [{"Measure": "Local SHAP–LIME Spearman ρ of |attributions|, median (IQR)",
                     "Value": fmt_ci(lime_df.spearman_abs.median(), lime_df.spearman_abs.quantile(.25),
@@ -257,9 +272,12 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
         rep.register_table(
             pd.DataFrame(s7), "TableS7_explanation_quality", "S7", "Fidelity, agreement and stability of the explanations",
             f"LIME ({cfg.lime_num_samples:,} perturbations per student; nominal and binary predictors declared "
-            "categorical) explained the predicted class of students sampled evenly from the three observed classes; "
-            f"explanations are interpretable only if R² ≥ {cfg.lime_min_fidelity:.2f}. Local agreement compares SHAP and "
-            "LIME for the same student, class and frozen model over the predictors selected by LIME", supplementary=True)
+            "categorical) explained the predicted class of students sampled evenly from the three observed classes, "
+            "plus the prespecified illustrative Enrolled case. Explanations are interpretable only if "
+            f"R² ≥ {cfg.lime_min_fidelity:.2f}. Local agreement compares SHAP and LIME for the same student, predicted "
+            "class and frozen model over the predictors selected by LIME; aggregated SHAP–LIME concordance uses this "
+            "same matched set. Low-fidelity LIME is supplementary and should not be interpreted as a faithful explanation.",
+            supplementary=True)
     if cross:
         rep.register_table(
             pd.DataFrame(cross), "TableS8_cross_model_stability", "S8",
@@ -314,14 +332,16 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
         loc_shap = pd.Series(v1[:, 1], index=COLS)
         consistency.update({"shap_base": float(b1[1]), "shap_base_plus_sum": float(b1[1] + loc_shap.sum())})
         assert abs(b1[1] + loc_shap.sum() - consistency["p_pipeline"]) < 1e-6, "SHAP additivity check failed"
-    if lime is not None and lime_rows:
-        e_ = lime.explain_instance(x_case[0], f_proba, labels=(1,), num_features=10, num_samples=cfg.lime_num_samples)
+    if CASE in lime_explanations:
+        e_ = lime_explanations[CASE]
         loc_lime = pd.DataFrame(e_.as_list(label=1), columns=["condition", "weight"])
         sc = e_.score[1] if isinstance(e_.score, dict) else e_.score
         consistency["lime_local_R2"] = float(sc)
     (ctx.paths.metadata / "shap_lime_consistency.json").write_text(json.dumps(consistency, indent=2), encoding="utf-8")
     if loc_shap is not None:
-        figure6(ctx, loc_shap, loc_lime, consistency, X_hold.iloc[CASE], COLS)
+        figure6(ctx, loc_shap, consistency, X_hold.iloc[CASE])
+    if loc_lime is not None:
+        figureS4_lime(ctx, loc_lime, consistency)
     (ctx.paths.metadata / "explainability_status.json").write_text(json.dumps(expl, indent=2), encoding="utf-8")
     log.info("Explainability: %s", expl)
 
@@ -337,39 +357,47 @@ def _val(c, v):
     return f"{v}" if c in NOMINAL else (f"{v:.0f}" if float(v).is_integer() else f"{v:.1f}")
 
 
-def figure6(ctx, loc_shap, loc_lime, consistency, case_row, cols) -> None:
-    cfg, best = ctx.cfg, ctx.BEST
-    nc = 2 if loc_lime is not None else 1
-    fig, axs = new_figure("double" if nc == 2 else "single", 84, ncols=nc)
-    axs = np.atleast_1d(axs)
+def figure6(ctx, loc_shap, consistency, case_row) -> None:
+    best = ctx.BEST
+    fig, ax = new_figure("single", 84)
     tl = loc_shap.reindex(loc_shap.abs().sort_values().index[-10:])
-    axs[0].barh(range(len(tl)), tl.values * 100, color=[C_POS if v > 0 else C_NEG for v in tl.values], height=0.62,
-                edgecolor="black", lw=0.3)
-    axs[0].set_yticks(range(len(tl)), [f"{short_name(c)} = {_val(c, case_row[c])}" for c in tl.index])
-    axs[0].axvline(0, color="black", lw=0.6)
-    axs[0].set_xlabel("SHAP value for P(Enrolled) (pp)")
-    axs[0].set_title(f"P(Enrolled) = {consistency['p_pipeline']:.3f}; base value = {consistency['shap_base']:.3f}",
-                     loc="right", fontsize=7)
-    axs[0].grid(axis="x", lw=0.4, color=GRID)
-    axs[0].set_axisbelow(True)
-    panel_label(axs[0], "a")
-    if nc == 2:
-        q_ = loc_lime.iloc[::-1]
-        axs[1].barh(range(len(q_)), q_.weight * 100, color=[C_POS if v > 0 else C_NEG for v in q_.weight], height=0.62,
-                    edgecolor="black", lw=0.3)
-        axs[1].set_yticks(range(len(q_)), [_short_condition(c, cols) for c in q_.condition])
-        axs[1].axvline(0, color="black", lw=0.6)
-        axs[1].set_xlabel("LIME weight for P(Enrolled) (pp)")
-        axs[1].set_title(f"Local R² = {consistency['lime_local_R2']:.2f}", loc="right", fontsize=7)
-        axs[1].grid(axis="x", lw=0.4, color=GRID)
-        axs[1].set_axisbelow(True)
-        panel_label(axs[1], "b")
+    ax.barh(range(len(tl)), tl.values * 100, color=[C_POS if v > 0 else C_NEG for v in tl.values], height=0.62,
+            edgecolor="black", lw=0.3)
+    ax.set_yticks(range(len(tl)), [f"{short_name(c)} = {_val(c, case_row[c])}" for c in tl.index])
+    ax.axvline(0, color="black", lw=0.6)
+    ax.set_xlabel("SHAP value for P(Enrolled) (pp)")
+    ax.set_title(f"P(Enrolled) = {consistency['p_pipeline']:.3f}; base value = {consistency['shap_base']:.3f}",
+                 loc="right", fontsize=7)
+    ax.grid(axis="x", lw=0.4, color=GRID)
+    ax.set_axisbelow(True)
+    panel_label(ax, "a")
     ctx.rep.save_figure(
         fig, "Fig6_local_explanation_enrolled",
         "Fig. 6 Local explanations of the same holdout student in the Enrolled class (prespecified: correctly classified "
         f"student closest to the median P(Enrolled)) from the same frozen {dn(best)} and prediction function. a SHAP "
-        "contributions (10 largest; base value plus contributions reproduces the calibrated probability). "
-        + (f"b LIME weights of the local surrogate (R² = {consistency['lime_local_R2']:.2f}); LIME is interpretable only "
-           f"if R² ≥ {cfg.lime_min_fidelity:.2f}. " if nc == 2 else "")
-        + "Vermillion bars increase and blue bars decrease the probability of remaining enrolled. CU1/CU2, curricular "
-        "units in the first/second semester; pp, percentage points")
+        "contributions (10 largest; base value plus contributions reproduces the calibrated probability). Vermillion bars "
+        "increase and blue bars decrease the probability of remaining enrolled. CU1/CU2, curricular units in the "
+        "first/second semester; pp, percentage points")
+
+
+def figureS4_lime(ctx, loc_lime, consistency) -> None:
+    cfg = ctx.cfg
+    fig, ax = new_figure("single", 84)
+    q_ = loc_lime.iloc[::-1]
+    ax.barh(range(len(q_)), q_.weight * 100, color=[C_POS if v > 0 else C_NEG for v in q_.weight], height=0.62,
+            edgecolor="black", lw=0.3)
+    ax.set_yticks(range(len(q_)), [_short_condition(c, ctx.ds.cols) for c in q_.condition])
+    ax.axvline(0, color="black", lw=0.6)
+    ax.set_xlabel("LIME weight for P(Enrolled) (pp)")
+    ax.set_title(f"Local R² = {consistency['lime_local_R2']:.2f}", loc="right", fontsize=7)
+    ax.grid(axis="x", lw=0.4, color=GRID)
+    ax.set_axisbelow(True)
+    panel_label(ax, "a")
+    meets_threshold = consistency["lime_local_R2"] >= cfg.lime_min_fidelity
+    fidelity_note = (f"The surrogate {'meets' if meets_threshold else 'does not meet'} the prespecified fidelity "
+                     f"threshold (R² ≥ {cfg.lime_min_fidelity:.2f}) and should {'be interpreted cautiously' if meets_threshold else 'not be interpreted as a faithful local explanation'}.")
+    ctx.rep.save_figure(
+        fig, "FigS4_lime_local_enrolled",
+        "Fig. S4 Supplementary LIME surrogate weights for the same prespecified holdout student and calibrated "
+        f"P(Enrolled) shown in Fig. 6 ({dn(ctx.BEST)}). {fidelity_note} Vermillion bars increase and blue bars decrease "
+        "the locally fitted probability; pp, percentage points.", supplementary=True)

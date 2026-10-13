@@ -1,0 +1,133 @@
+{
+  "selected_model": "VotingSoft",
+  "reference": "LogisticRegression (reference)",
+  "class_order": [
+    "Dropout",
+    "Enrolled",
+    "Graduate"
+  ],
+  "hyperparameters": {
+    "RandomForest": {
+      "n_estimators": 200,
+      "min_samples_leaf": 2,
+      "max_features": "log2",
+      "max_depth": null
+    },
+    "ExtraTrees": {
+      "n_estimators": 600,
+      "min_samples_leaf": 4,
+      "max_features": 0.5,
+      "max_depth": 20
+    },
+    "GradientBoosting": {
+      "subsample": 1.0,
+      "n_estimators": 300,
+      "max_depth": 2,
+      "learning_rate": 0.05
+    },
+    "XGBoost": {
+      "subsample": 0.7,
+      "n_estimators": 600,
+      "min_child_weight": 1,
+      "max_depth": 4,
+      "learning_rate": 0.05,
+      "colsample_bytree": 0.6
+    },
+    "LightGBM": {
+      "subsample": 0.7,
+      "reg_lambda": 0.0,
+      "num_leaves": 7,
+      "n_estimators": 200,
+      "min_child_samples": 20,
+      "learning_rate": 0.05,
+      "colsample_bytree": 0.6
+    },
+    "CatBoost": {
+      "learning_rate": 0.05,
+      "l2_leaf_reg": 1,
+      "iterations": 800,
+      "depth": 4
+    },
+    "VotingSoft": {
+      "RandomForest": {
+        "n_estimators": 200,
+        "min_samples_leaf": 2,
+        "max_features": "log2",
+        "max_depth": null
+      },
+      "ExtraTrees": {
+        "n_estimators": 600,
+        "min_samples_leaf": 4,
+        "max_features": 0.5,
+        "max_depth": 20
+      },
+      "XGBoost": {
+        "subsample": 0.7,
+        "n_estimators": 600,
+        "min_child_weight": 1,
+        "max_depth": 4,
+        "learning_rate": 0.05,
+        "colsample_bytree": 0.6
+      },
+      "LightGBM": {
+        "subsample": 0.7,
+        "reg_lambda": 0.0,
+        "num_leaves": 7,
+        "n_estimators": 200,
+        "min_child_samples": 20,
+        "learning_rate": 0.05,
+        "colsample_bytree": 0.6
+      }
+    },
+    "Stacking": {
+      "RandomForest": {
+        "n_estimators": 200,
+        "min_samples_leaf": 2,
+        "max_features": "log2",
+        "max_depth": null
+      },
+      "ExtraTrees": {
+        "n_estimators": 600,
+        "min_samples_leaf": 4,
+        "max_features": 0.5,
+        "max_depth": 20
+      },
+      "XGBoost": {
+        "subsample": 0.7,
+        "n_estimators": 600,
+        "min_child_weight": 1,
+        "max_depth": 4,
+        "learning_rate": 0.05,
+        "colsample_bytree": 0.6
+      },
+      "LightGBM": {
+        "subsample": 0.7,
+        "reg_lambda": 0.0,
+        "num_leaves": 7,
+        "n_estimators": 200,
+        "min_child_samples": 20,
+        "learning_rate": 0.05,
+        "colsample_bytree": 0.6
+      }
+    },
+    "LogisticRegression (reference)": {
+      "C": 0.03
+    }
+  },
+  "temperature": {
+    "RandomForest": 0.6169827067577266,
+    "ExtraTrees": 0.8520093600166067,
+    "GradientBoosting": 0.9307270612411304,
+    "XGBoost": 1.2615353145912978,
+    "LightGBM": 0.9824280521434738,
+    "CatBoost": 1.0418308258108255,
+    "VotingSoft": 0.813961218036158,
+    "Stacking": 0.9715989869412652,
+    "LogisticRegression (reference)": 0.9599187608308035
+  },
+  "calibration_primary": "temperature",
+  "resampling": "smotenc",
+  "decision_rule": "argmax of calibrated probabilities",
+  "frozen_utc": "2026-10-13T04:30:10.095348+00:00",
+  "note": "Models were serialised with joblib; reloading requires the class definitions of \u00a74\u2013\u00a75 of this notebook"
+}

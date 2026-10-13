@@ -1,0 +1,37 @@
+﻿Model,Calibration,Macro-F1,Brier score,Log-loss,ECE (top-label),Class-wise ECE,ECE (Enrolled)
+Soft voting,Uncalibrated,0.725,0.3153,0.564,0.061,0.054,0.057
+Soft voting,Temperature scaling,0.725,0.3108,0.553,0.034,0.039,0.042
+Soft voting,Isotonic (OvR) †,0.713,0.3099,0.561,0.033,0.036,0.037
+Soft voting,Dirichlet (matrix scaling),0.708,0.3076,0.547,0.035,0.036,0.038
+XGBoost,Uncalibrated,0.715,0.3141,0.558,0.042,0.043,0.045
+XGBoost,Temperature scaling,0.715,0.3138,0.557,0.039,0.041,0.043
+XGBoost,Isotonic (OvR),0.703,0.3124,0.565,0.034,0.038,0.040
+XGBoost,Dirichlet (matrix scaling) †,0.707,0.3092,0.550,0.035,0.035,0.033
+LightGBM,Uncalibrated,0.715,0.3134,0.557,0.033,0.039,0.041
+LightGBM,Temperature scaling,0.715,0.3141,0.558,0.041,0.043,0.041
+LightGBM,Isotonic (OvR),0.709,0.3130,0.568,0.039,0.039,0.038
+LightGBM,Dirichlet (matrix scaling) †,0.707,0.3089,0.549,0.032,0.035,0.034
+Gradient boosting,Uncalibrated,0.713,0.3186,0.566,0.041,0.043,0.045
+Gradient boosting,Temperature scaling,0.713,0.3189,0.566,0.041,0.043,0.043
+Gradient boosting,Isotonic (OvR),0.703,0.3176,0.569,0.043,0.039,0.041
+Gradient boosting,Dirichlet (matrix scaling) †,0.704,0.3144,0.558,0.036,0.036,0.033
+Stacking,Uncalibrated,0.712,0.3080,0.554,0.033,0.037,0.039
+Stacking,Temperature scaling,0.712,0.3081,0.554,0.035,0.038,0.038
+Stacking,Isotonic (OvR),0.709,0.3082,0.563,0.039,0.037,0.037
+Stacking,Dirichlet (matrix scaling) †,0.713,0.3084,0.553,0.036,0.036,0.033
+Extra trees,Uncalibrated,0.711,0.3385,0.604,0.057,0.060,0.067
+Extra trees,Temperature scaling,0.711,0.3355,0.599,0.043,0.055,0.064
+Extra trees,Isotonic (OvR) †,0.698,0.3253,0.589,0.036,0.036,0.034
+Extra trees,Dirichlet (matrix scaling),0.683,0.3255,0.582,0.043,0.039,0.035
+Random forest,Uncalibrated,0.710,0.3469,0.622,0.099,0.080,0.079
+Random forest,Temperature scaling,0.710,0.3299,0.587,0.037,0.045,0.053
+Random forest,Isotonic (OvR),0.703,0.3257,0.587,0.033,0.036,0.038
+Random forest,Dirichlet (matrix scaling) †,0.698,0.3234,0.576,0.034,0.034,0.033
+CatBoost,Uncalibrated,0.708,0.3252,0.575,0.041,0.045,0.052
+CatBoost,Temperature scaling,0.708,0.3245,0.574,0.039,0.044,0.047
+CatBoost,Isotonic (OvR),0.697,0.3213,0.579,0.039,0.037,0.033
+CatBoost,Dirichlet (matrix scaling) †,0.690,0.3177,0.563,0.035,0.034,0.030
+Logistic regression,Uncalibrated,0.700,0.3468,0.611,0.040,0.066,0.082
+Logistic regression,Temperature scaling,0.700,0.3472,0.608,0.042,0.070,0.087
+Logistic regression,Isotonic (OvR),0.695,0.3254,0.591,0.037,0.038,0.035
+Logistic regression,Dirichlet (matrix scaling) †,0.694,0.3188,0.569,0.038,0.036,0.033

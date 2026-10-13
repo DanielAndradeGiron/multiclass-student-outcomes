@@ -1,0 +1,10 @@
+﻿Model,Class,Observed,Expected (Σ p),Expected/observed
+Soft voting (temperature scaling),Dropout,284,278.4,0.980
+Soft voting (temperature scaling),Enrolled,159,173.9,1.094
+Soft voting (temperature scaling),Graduate,442,432.7,0.979
+Soft voting (uncalibrated),Dropout,284,282.4,0.994
+Soft voting (uncalibrated),Enrolled,159,187.3,1.178
+Soft voting (uncalibrated),Graduate,442,415.3,0.940
+LR reference,Dropout,284,281.0,0.989
+LR reference,Enrolled,159,225.5,1.419
+LR reference,Graduate,442,378.4,0.856

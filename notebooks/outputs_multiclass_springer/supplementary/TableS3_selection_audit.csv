@@ -1,0 +1,2 @@
+﻿Criterion,Direction,Best,Tolerance,Before,After,Retained models
+Macro-F1,maximise,0.7246,0.005,8,1,Soft voting

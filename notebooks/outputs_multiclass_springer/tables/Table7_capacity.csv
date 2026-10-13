@@ -1,0 +1,13 @@
+﻿Score,Capacity,Model,"Target captured, % (95% CI)","Precision, % (95% CI)",Dropouts captured,Enrolled captured
+Ranking by P(Dropout),10% (n = 89),Soft voting,30.6 (25.3–36.4),97.8 (92.1–99.7),87/284,2/159
+Ranking by P(Dropout),10% (n = 89),LR reference,31.3 (26.0–37.1),100.0 (95.9–100.0),89/284,0/159
+Ranking by P(Dropout),20% (n = 177),Soft voting,59.2 (53.2–64.9),94.9 (90.6–97.6),168/284,9/159
+Ranking by P(Dropout),20% (n = 177),LR reference,58.8 (52.8–64.6),94.4 (89.9–97.3),167/284,9/159
+Ranking by P(Dropout),30% (n = 266),Soft voting,79.2 (74.0–83.8),84.6 (79.7–88.7),225/284,25/159
+Ranking by P(Dropout),30% (n = 266),LR reference,78.5 (73.3–83.2),83.8 (78.8–88.0),223/284,28/159
+Ranking by P(Dropout) + P(Enrolled),10% (n = 89),Soft voting,20.1 (16.5–24.1),100.0 (95.9–100.0),86/284,3/159
+Ranking by P(Dropout) + P(Enrolled),10% (n = 89),LR reference,20.1 (16.5–24.1),100.0 (95.9–100.0),86/284,3/159
+Ranking by P(Dropout) + P(Enrolled),20% (n = 177),Soft voting,40.0 (35.4–44.7),100.0 (97.9–100.0),163/284,14/159
+Ranking by P(Dropout) + P(Enrolled),20% (n = 177),LR reference,39.7 (35.1–44.5),99.4 (96.9–100.0),163/284,13/159
+Ranking by P(Dropout) + P(Enrolled),30% (n = 266),Soft voting,59.8 (55.1–64.4),99.6 (97.9–100.0),213/284,52/159
+Ranking by P(Dropout) + P(Enrolled),30% (n = 266),LR reference,59.4 (54.6–64.0),98.9 (96.7–99.8),218/284,45/159

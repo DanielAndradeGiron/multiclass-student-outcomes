@@ -1,0 +1,82 @@
+{
+  "pipeline_version": "2.0",
+  "data_path": "data.csv",
+  "uci_url": "https://archive.ics.uci.edu/static/public/697/predict+students+dropout+and+academic+success.zip",
+  "classes": [
+    "Dropout",
+    "Enrolled",
+    "Graduate"
+  ],
+  "expected_counts": [
+    1421,
+    794,
+    2209
+  ],
+  "output_dir": "outputs_multiclass_springer",
+  "test_size": 0.2,
+  "random_state": 42,
+  "min_category_frequency": 20,
+  "group_by_predictor_profile": true,
+  "outer_splits": 5,
+  "outer_repeats": 2,
+  "inner_splits": 3,
+  "calibration_splits": 3,
+  "stacking_splits": 5,
+  "search_n_iter": 15,
+  "tuning_scoring": "f1_macro",
+  "resampling": "smotenc",
+  "calibration_primary": "temperature",
+  "calibration_methods": [
+    "uncalibrated",
+    "temperature",
+    "isotonic",
+    "dirichlet"
+  ],
+  "ece_bins": 15,
+  "reliability_bins": 10,
+  "meta_base": [
+    "RandomForest",
+    "ExtraTrees",
+    "XGBoost",
+    "LightGBM"
+  ],
+  "practical_margin_f1m": 0.01,
+  "practical_margin_mcc": 0.01,
+  "tol_f1m": 0.005,
+  "tol_mcc": 0.01,
+  "tol_auc": 0.005,
+  "tol_brier": 0.005,
+  "alpha": 0.05,
+  "holdout_bootstrap": 2000,
+  "capacity_levels": [
+    0.1,
+    0.2,
+    0.3
+  ],
+  "subgroup_min_n": 30,
+  "sensitivity_splits": 5,
+  "sensitivity_repeats": 1,
+  "perm_repeats": 20,
+  "shap_background": 100,
+  "shap_explain": 200,
+  "shap_bootstrap": 200,
+  "stability_models": 3,
+  "lime_min_fidelity": 0.5,
+  "lime_cases": 30,
+  "lime_num_samples": 3000,
+  "n_jobs": -1,
+  "n_workers": 0,
+  "max_workers": 8,
+  "fit_cache_size": 24,
+  "resample_cache_size": 64,
+  "reuse_cache": true,
+  "fig_formats": [
+    "pdf",
+    "eps",
+    "tiff",
+    "png"
+  ],
+  "tiff_dpi": 600,
+  "png_dpi": 300,
+  "min_font_pt": 7.0
+}

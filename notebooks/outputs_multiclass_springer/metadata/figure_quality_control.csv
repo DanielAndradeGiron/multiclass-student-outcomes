@@ -1,0 +1,11 @@
+figure,width_mm,height_mm,min_font_pt,width_ok,height_ok,font_ok,formats
+Fig1_study_design,174.0,100.0,7.0,True,True,True,"pdf,eps,tiff,png"
+Fig2_benchmarking,174.0,160.0,7.0,True,True,True,"pdf,eps,tiff,png"
+FigS2_calibration_methods,174.0,106.0,7.0,True,True,True,"pdf,eps,tiff,png"
+FigS1_outcomes_and_ranks,174.0,66.0,7.0,True,True,True,"pdf,eps,tiff,png"
+Fig3_holdout_discrimination_calibration,174.0,128.0,7.0,True,True,True,"pdf,eps,tiff,png"
+Fig4_decision,174.0,72.0,7.0,True,True,True,"pdf,eps,tiff,png"
+FigS3_subgroups,84.0,113.5,7.0,True,True,True,"pdf,eps,tiff,png"
+Fig7_sensitivity,174.0,200.0,7.0,True,True,True,"pdf,eps,tiff,png"
+Fig5_shap_by_class,174.0,108.0,7.0,True,True,True,"pdf,eps,tiff,png"
+Fig6_local_explanation_enrolled,174.0,84.0,7.0,True,True,True,"pdf,eps,tiff,png"

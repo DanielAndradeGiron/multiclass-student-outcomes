@@ -1,0 +1,8 @@
+{
+  "file": "data.csv",
+  "sha256": "3ef126de5cefff26eb11fbb4237f1a1401cb64b488e2f1d598c23cedeb4c45ae",
+  "bytes": 533230,
+  "reference_sha256_uci_697": "3ef126de5cefff26eb11fbb4237f1a1401cb64b488e2f1d598c23cedeb4c45ae",
+  "matches_reference": true,
+  "retrieved_utc": "2026-10-13T02:53:43.226889+00:00"
+}

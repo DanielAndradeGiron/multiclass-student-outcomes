@@ -1,0 +1,13 @@
+numpy==2.5.4
+pandas==3.0.6
+scikit-learn==1.9.1
+scipy==1.18.1
+matplotlib==3.11.2
+joblib==1.6.0
+imbalanced-learn==0.14.2
+xgboost==3.4.1
+lightgbm==4.7.0
+catboost==1.2.10
+shap==0.53.0
+lime==0.2.0.1
+python-docx==1.2.0

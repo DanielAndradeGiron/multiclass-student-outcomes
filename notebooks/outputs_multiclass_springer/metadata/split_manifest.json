@@ -1,0 +1,23 @@
+{
+  "n_total": 4424,
+  "duplicates_removed": 0,
+  "n_development": 3539,
+  "n_holdout": 885,
+  "class_order": [
+    "Dropout",
+    "Enrolled",
+    "Graduate"
+  ],
+  "dev_counts": {
+    "Dropout": 1137,
+    "Enrolled": 635,
+    "Graduate": 1767
+  },
+  "holdout_counts": {
+    "Dropout": 284,
+    "Enrolled": 159,
+    "Graduate": 442
+  },
+  "holdout_ids_sha256": "436359fdfc27a8f43ae99918d78a5f6f5ae6e56b5d18eb314f914379ac5f8f80",
+  "status": "HOLDOUT_LOCKED"
+}

@@ -1,0 +1,9 @@
+stage,seconds,workers
+Data audit and holdout lock,3.4,8
+Repeated nested cross-validation,5073.7,8
+RQ1 statistical comparison,5.0,8
+Final fit on the development set,691.6,8
+Holdout evaluation,11.9,8
+Sensitivity analyses,1558.0,8
+Explainability,466.3,8
+Integrity checks and export,2.8,8

@@ -1,0 +1,10 @@
+{
+  "case_row_id": 2247,
+  "observed": "Enrolled",
+  "class_explained": "Enrolled",
+  "p_pipeline": 0.6309423021837941,
+  "p_prediction_function": 0.6309423021837941,
+  "shap_base": 0.20789484972027772,
+  "shap_base_plus_sum": 0.6309423021837954,
+  "lime_local_R2": 0.27269365491850606
+}
