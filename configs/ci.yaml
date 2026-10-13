@@ -1,0 +1,7 @@
+# Integración continua: datos SINTÉTICOS con el esquema UCI 697 (sin descarga) + modo rápido.
+extends: quick.yaml
+data_path: data/synthetic/data.csv
+download_if_missing: false
+expected_counts: null
+output_dir: outputs/ci
+allow_missing_libraries: true

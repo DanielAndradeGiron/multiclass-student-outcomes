@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.ipynb linguist-language=Python
+*.png binary
+*.pdf binary
+*.joblib binary

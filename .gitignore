@@ -1,0 +1,38 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# --- Entornos ---
+.venv/
+venv/
+env/
+.env
+
+# --- Datos (no se versionan: se descargan con `eduoutcomes download-data`) ---
+data/raw/*
+!data/raw/.gitkeep
+data/synthetic/
+
+# --- Resultados (se regeneran; publícalos como Release o en Zenodo) ---
+outputs/
+*.zip
+catboost_info/
+
+# --- Sistema / IDE ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json

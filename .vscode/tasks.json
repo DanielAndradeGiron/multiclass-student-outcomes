@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "Crear entorno (.venv) e instalar", "type": "shell",
+      "command": "python -m venv .venv && ${command:python.interpreterPath} -m pip install -U pip && ${command:python.interpreterPath} -m pip install -e \".[dev]\"",
+      "windows": { "command": "py -m venv .venv; .venv\\Scripts\\python -m pip install -U pip; .venv\\Scripts\\python -m pip install -e \".[dev]\"" },
+      "problemMatcher": [] },
+    { "label": "Descargar datos UCI 697", "type": "shell", "command": "${command:python.interpreterPath} -m eduoutcomes download-data", "problemMatcher": [] },
+    { "label": "Generar datos sintéticos", "type": "shell", "command": "${command:python.interpreterPath} -m eduoutcomes make-synthetic", "problemMatcher": [] },
+    { "label": "Pruebas unitarias", "type": "shell", "command": "${command:python.interpreterPath} -m pytest -m \"not slow\"", "group": "test", "problemMatcher": [] },
+    { "label": "Pruebas completas", "type": "shell", "command": "${command:python.interpreterPath} -m pytest", "group": { "kind": "test", "isDefault": true }, "problemMatcher": [] },
+    { "label": "Lint (ruff)", "type": "shell", "command": "${command:python.interpreterPath} -m ruff check src tests", "problemMatcher": [] },
+    { "label": "Pipeline: corrida completa", "type": "shell", "command": "${command:python.interpreterPath} -m eduoutcomes run -c configs/default.yaml", "group": { "kind": "build", "isDefault": true }, "problemMatcher": [] }
+  ]
+}

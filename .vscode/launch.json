@@ -1,0 +1,57 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Pipeline: prueba rápida (datos sintéticos)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "eduoutcomes",
+      "args": ["run", "-c", "configs/ci.yaml"],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Generar datos sintéticos",
+      "justMyCode": true
+    },
+    {
+      "name": "Pipeline: modo rápido (datos reales, NO reportable)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "eduoutcomes",
+      "args": ["run", "-c", "configs/quick.yaml"],
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "Pipeline: corrida completa (manuscrito)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "eduoutcomes",
+      "args": ["run", "-c", "configs/default.yaml"],
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "Pipeline: hasta una etapa…",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "eduoutcomes",
+      "args": ["run", "-c", "${input:config}", "--until", "${input:stage}"],
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "Pruebas (pytest)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-m", "not slow", "-q"],
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "inputs": [
+    { "id": "config", "type": "pickString", "description": "Configuración",
+      "options": ["configs/ci.yaml", "configs/quick.yaml", "configs/default.yaml"], "default": "configs/ci.yaml" },
+    { "id": "stage", "type": "pickString", "description": "Detener después de",
+      "options": ["data", "describe", "cv", "rq1", "rq2", "final", "holdout", "decision", "subgroups",
+                  "sensitivity", "explain", "export"], "default": "rq1" }
+  ]
+}

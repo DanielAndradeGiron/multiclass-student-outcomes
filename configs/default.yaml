@@ -1,0 +1,81 @@
+# =============================================================================================
+# Configuración preespecificada del estudio (pipeline v2.0) — reproduce el manuscrito.
+# Las secciones solo agrupan por legibilidad; al cargar se aplanan. Sobrescribe desde la CLI:
+#   eduoutcomes run -c configs/default.yaml --set n_workers=4
+# =============================================================================================
+pipeline_version: "2.0"
+
+data:
+  data_path: data/raw/data.csv          # se descarga de la UCI si no existe
+  download_if_missing: true
+  expected_counts: [1421, 794, 2209]    # Dropout / Enrolled / Graduate (null desactiva la verificación)
+  require_reference_sha: false          # true: aborta si el SHA-256 no coincide con la referencia UCI 697
+  test_size: 0.20
+  random_state: 42
+  min_category_frequency: 20
+  group_by_predictor_profile: true
+
+output:
+  output_dir: outputs/main
+
+nested_cv:
+  outer_splits: 5
+  outer_repeats: 2
+  inner_splits: 3
+  calibration_splits: 3
+  stacking_splits: 5
+  search_n_iter: 15
+  tuning_scoring: f1_macro
+
+imbalance_and_calibration:
+  resampling: smotenc                   # sensibilidad: random_oversampling, none
+  calibration_primary: temperature      # conserva la clase predicha
+  calibration_methods: [uncalibrated, temperature, isotonic, dirichlet]
+  ece_bins: 15
+  reliability_bins: 10
+
+meta_ensembles:
+  meta_base: [RandomForest, ExtraTrees, XGBoost, LightGBM]
+
+selection:
+  practical_margin_f1m: 0.010
+  practical_margin_mcc: 0.010
+  tol_f1m: 0.005
+  tol_mcc: 0.010
+  tol_auc: 0.005
+  tol_brier: 0.005
+  alpha: 0.05
+
+holdout:
+  holdout_bootstrap: 2000
+  capacity_levels: [0.10, 0.20, 0.30]
+  subgroup_min_n: 30
+
+sensitivity:
+  sensitivity_splits: 5
+  sensitivity_repeats: 1
+
+explainability:
+  perm_repeats: 20
+  shap_background: 100
+  shap_explain: 200
+  shap_bootstrap: 200
+  stability_models: 3
+  lime_min_fidelity: 0.50
+  lime_cases: 30
+  lime_num_samples: 3000
+
+compute:                                # solo afectan al tiempo, nunca a los resultados
+  n_jobs: -1
+  n_workers: 0                          # 0 = todos los núcleos (máximo max_workers)
+  max_workers: 8
+  fit_cache_size: 24
+  resample_cache_size: 64
+  reuse_cache: true                     # reanuda bloques ya calculados
+
+figures:                                # Springer Nature: 84/129/174 mm, ≤ 234 mm, rótulos ≥ 7 pt
+  fig_formats: [pdf, eps, tiff, png]
+  tiff_dpi: 600
+  png_dpi: 300
+  min_font_pt: 7.0
+  show_figures: false

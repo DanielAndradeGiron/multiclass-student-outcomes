@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Multiclass Prediction of Student Academic Outcomes: Benchmarking Calibrated and Explainable Ensemble and Meta-Ensemble Learning"
+version: 2.0.0
+date-released: 2026-10-12
+license: MIT
+repository-code: "https://github.com/OWNER/multiclass-student-outcomes"
+authors:
+  - family-names: Andrade
+    given-names: Daniel
+    email: dandrade@unjfsc.edu.pe
+references:
+  - type: article
+    title: "Predicting Student Dropout and Academic Success"
+    authors:
+      - family-names: Realinho
+        given-names: Valentim
+      - family-names: Machado
+        given-names: Jorge
+      - family-names: Baptista
+        given-names: Luís
+      - family-names: Martins
+        given-names: Mónica V.
+    journal: Data
+    volume: 7
+    issue: 11
+    start: 146
+    year: 2022

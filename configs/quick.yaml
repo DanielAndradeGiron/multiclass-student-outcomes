@@ -1,0 +1,21 @@
+# Modo rápido: SOLO comprueba que todo se ejecuta. NO reportes estos resultados.
+extends: default.yaml
+quick: true
+output_dir: outputs/quick
+outer_splits: 2
+outer_repeats: 1
+inner_splits: 2
+search_n_iter: 2
+calibration_splits: 2
+stacking_splits: 2
+holdout_bootstrap: 50
+sensitivity_splits: 2
+perm_repeats: 2
+shap_background: 15
+shap_explain: 20
+shap_bootstrap: 20
+lime_cases: 3
+lime_num_samples: 300
+stability_models: 2
+reuse_cache: false
+fig_formats: [pdf, png]
