@@ -8,7 +8,7 @@ matplotlib==3.10.0
 joblib==1.6.0
 imbalanced-learn==0.14.2
 xgboost==3.4.1
-lightgbm==4.6.0
+lightgbm==4.7.0
 catboost==1.2.10
 shap==0.52.0
 lime==0.2.0.1
