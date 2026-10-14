@@ -56,7 +56,7 @@ jobs:
       - run: pip install -e .
       - run: eduoutcomes make-synthetic
       - run: eduoutcomes run -c configs/ci.yaml --set allow_missing_libraries=false
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ci-outputs-synthetic
           path: outputs/ci.zip
