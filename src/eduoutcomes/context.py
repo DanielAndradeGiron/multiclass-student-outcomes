@@ -86,13 +86,13 @@ class Context:
 
     def cache_key(self) -> tuple[str, str]:
         """Clave de caché: todo lo que puede alterar los resultados (configuración, rejillas, datos, librerías)."""
-        keys = ("pipeline_version", "outer_splits", "outer_repeats", "inner_splits", "search_n_iter", "tuning_scoring",
+        keys = ("pipeline_version", "scenario", "outer_splits", "outer_repeats", "inner_splits", "search_n_iter", "tuning_scoring",
                 "calibration_primary", "calibration_methods", "calibration_splits", "resampling", "stacking_splits",
                 "min_category_frequency", "random_state", "test_size", "group_by_predictor_profile", "meta_base",
                 "ece_bins", "quick")
         key = json.dumps({k: v for k, v in asdict(self.cfg).items() if k in keys}
                          | {"models": self.factory.model_names, "meta_base_used": self.factory.meta_base,
-                            "n": len(self.ds.y_dev), "params": self.factory.params, "data_sha256": self.ds.data_sha,
+                            "n": len(self.ds.y_dev), "cols": self.ds.cols, "params": self.factory.params, "data_sha256": self.ds.data_sha,
                             "libs": {k: self.versions[k] for k in ("scikit-learn", "imbalanced-learn", "xgboost",
                                                                     "lightgbm", "catboost")}},
                          sort_keys=True, default=str)

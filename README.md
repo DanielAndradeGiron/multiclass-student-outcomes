@@ -1,7 +1,8 @@
 # Multiclass Prediction of Student Academic Outcomes
 
 **Benchmarking calibrated and explainable ensemble and meta-ensemble learning**
-Código reproducible del manuscrito enviado a *Education and Information Technologies* (Springer) — *pipeline* v2.0.
+Código reproducible del manuscrito enviado a *Education and Information Technologies* (Springer) — *pipeline* v3.0
+(escenarios temporales de predicción; `scenario: T2` reproduce el diseño de la v2.0).
 
 [![CI](https://github.com/OWNER/multiclass-student-outcomes/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/multiclass-student-outcomes/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue)
@@ -17,6 +18,38 @@ Datos: *Predict Students' Dropout and Academic Success* (Realinho et al., 2021, 
 | **PI1** | ¿Los ensambles y metaensambles discriminan mejor (estadística **y** prácticamente) que una LR multinomial calibrada? | Tablas 2, 3, 5, 6 · Fig. 2 |
 | **PI2** | ¿Qué tan bien calibradas están las probabilidades por clase, en especial *Enrolled*? | Tablas 4, 6, S5 · Figs. 3, S2 |
 | **PI3** | ¿Qué predictores impulsan las predicciones calibradas y qué tan consistentes son las explicaciones? | Tabla 8, S7–S8 · Figs. 5–6 |
+
+
+## Novedades de la v3.0 — escenarios temporales de predicción
+
+La v2.0 usaba los 36 predictores, incluidos los resultados del primer y segundo semestre; su rendimiento corresponde,
+por tanto, al **final del primer año**, no al ingreso. La v3.0 evalúa por separado cuatro escenarios, con el mismo
+protocolo y la **misma reserva** (huella SHA-256 idéntica a la v2.0):
+
+| Escenario | Momento | Predictores |
+|---|---|---|
+| `T0_strict` | Ingreso | 21 (sin `Debtor`, `Tuition fees up to date`, `Scholarship holder`: momento de medición no documentado) |
+| `T0` | Ingreso | 24 |
+| `T1` | Fin del 1.er semestre | 30 |
+| `T2` | Fin del 1.er año | 36 (= v2.0) |
+
+```bash
+eduoutcomes run-scenarios -c configs/default.yaml          # 4 escenarios + comparación (Tablas 10–12, Fig. 8)
+eduoutcomes temporal-validation -c configs/default.yaml    # exploratorio: origen móvil por cohorte inferida
+eduoutcomes run -c configs/default.yaml --set scenario=T1  # un solo escenario
+```
+
+Salidas: `outputs/main/<escenario>/` (mismas tablas y figuras de la v2.0 para cada escenario),
+`outputs/main/comparison/` y `outputs/main/temporal_validation/`. Plan preespecificado:
+[`docs/ANALYSIS_PLAN_v3.md`](docs/ANALYSIS_PLAN_v3.md); auditoría: [`docs/AUDIT_v3.md`](docs/AUDIT_v3.md).
+
+Además: puertas de calidad temporales (ningún predictor posterior al momento de predicción), PR-AUC y especificidad
+por clase, sensibilidad de LIME elegida en desarrollo (Tabla S11), cohortes inferidas (Tabla S15) y auditoría de las
+variables de momento incierto (Tabla S16). Interpretación obligatoria: *Enrolled* no es permanencia longitudinal y la
+predicción retrospectiva no es detección temprana.
+
+> Duración orientativa: la v2.0 (un escenario) tardó ≈ 2.3 h con 8 procesos; `run-scenarios` multiplica ese tiempo
+> por cuatro (T0 y T1 son algo más rápidos).
 
 ---
 

@@ -70,7 +70,13 @@ def run(ctx) -> None:
     s_splits = [sp for r in range(cfg.sensitivity_repeats)
                 for sp in gsplits(cfg.sensitivity_splits, ds.y_dev, ds.g_dev, cfg.random_state + 300 + r)]
     cols_all = ds.cols
-    settings = [("Prediction horizon", nm, cols, cfg.resampling) for nm, cols in ds.pred_sets.items()] + \
+    # v3.0: el análisis de horizonte solo se conserva en T2 (reproduce la Tabla 9 de la v2.0). En los demás escenarios
+    # añadir predictores posteriores violaría el momento de predicción; la comparación entre horizontes se hace con
+    # `eduoutcomes compare-scenarios` (todos los modelos, CV anidada completa y reserva).
+    analyses = ANALYSES if ds.scenario == "T2" else ["Imbalance handling"]
+    horizon = [("Prediction horizon", nm, cols, cfg.resampling) for nm, cols in ds.pred_sets.items()] \
+        if "Prediction horizon" in analyses else []
+    settings = horizon + \
                [("Imbalance handling", lab, cols_all, rs) for lab, rs in [("SMOTENC (primary)", cfg.resampling),
                                                                         ("Random oversampling", "random_oversampling"),
                                                                         ("No resampling", "none")]]
@@ -98,7 +104,7 @@ def run(ctx) -> None:
 
     # ---------------------------------------------------- Tabla 9 (media ± DE; negrita = mejor por análisis)
     t9, bold9 = [], set()
-    for an in ANALYSES:
+    for an in analyses:
         sts = [st for a_, st, *_ in settings if a_ == an]
         first = len(t9)
         for st in sts:
@@ -137,7 +143,7 @@ def run(ctx) -> None:
     t_s10 = pd.DataFrame([{"Analysis": an, "Contrast": CLAB.get(st, st), "Metric": LABELS[m],
                            "Mean difference (95% CI)": fmt_ci(r["diff"], r.lo, r.hi, 3, signed=True),
                            "p": fmt_p(r.p), "Holm p": fmt_p(r.p_holm)}
-                          for an in ANALYSES for st in [s for a_, s in contrasts if a_ == an] for m in DELTA_METS
+                          for an in analyses for st in [s for a_, s in contrasts if a_ == an] for m in DELTA_METS
                           for _, r in sens_delta[(sens_delta.analysis == an) & (sens_delta.setting == st)
                                                  & (sens_delta.metric == m)].iterrows()])
     rep.register_table(
@@ -147,25 +153,27 @@ def run(ctx) -> None:
         f"(n_test/n_train = {sens_ratio:.2f}) with Holm adjustment within each metric over the {len(contrasts)} "
         "contrasts. For class-wise ECE, negative differences indicate better calibration. Cross-validation folds are not "
         "independent, so the tests are approximate", supplementary=True, group_col="Analysis")
-    figure7(ctx, settings, contrasts, sens_delta, fold_values, len(s_splits), model)
+    figure7(ctx, settings, contrasts, sens_delta, fold_values, len(s_splits), model, analyses)
 
 
-def figure7(ctx, settings, contrasts, sens_delta, fold_values, n_folds, model) -> None:
+def figure7(ctx, settings, contrasts, sens_delta, fold_values, n_folds, model, analyses=None) -> None:
     cfg = ctx.cfg
+    analyses = list(analyses or ANALYSES)
+    nr = len(analyses)
     families = [("Discrimination", "Score", [("f1_macro", "o", OKABE_ITO["black"]), ("mcc", "D", OKABE_ITO["green"]),
                                              ("roc_auc_macro", "v", OKABE_ITO["purple"])]),
                 ("Recall by class", "Recall", [(f"recall_{c}", M_CLASS[c], C_CLASS[c]) for c in CLASSES]),
                 ("Calibration error", "ECE (lower is better)", [("cw_ece", "D", C_REF),
                                                                 ("ece_Enrolled", "h", C_CLASS["Enrolled"])])]
     band = tint(OKABE_ITO["yellow"], 0.25)
-    fig = new_canvas("double", 200, wspace=0.03, hspace=0.025)
-    gs = fig.add_gridspec(4, 3, height_ratios=[1, 1, 0.17, 0.95])
-    axes = np.empty((2, 3), dtype=object)
-    for r in range(2):
+    fig = new_canvas("double", 200 if nr == 2 else 130, wspace=0.03, hspace=0.025)
+    gs = fig.add_gridspec(nr + 2, 3, height_ratios=[1] * nr + [0.17 if nr == 2 else 0.25, 0.95 if nr == 2 else 0.8])
+    axes = np.empty((nr, 3), dtype=object)
+    for r in range(nr):
         for c in range(3):
             axes[r, c] = fig.add_subplot(gs[r, c], sharey=axes[0, c] if r else None)
     handles = {}
-    for r, an in enumerate(ANALYSES):
+    for r, an in enumerate(analyses):
         st_ = [st for a_, st, *_ in settings if a_ == an]
         xs_ = np.arange(len(st_))
         ip = st_.index(PRIMARY[an])
@@ -194,19 +202,19 @@ def figure7(ctx, settings, contrasts, sens_delta, fold_values, n_folds, model) -
                 ax.set_title(an)
     axes[0, 1].set_ylim(0, 1.0)
     axes[0, 2].set_ylim(bottom=0)
-    for (r, c), letter in zip([(r, c) for r in range(2) for c in range(3)], "abcdef"):
+    for (r, c), letter in zip([(r, c) for r in range(nr) for c in range(3)], "abcdef"):
         panel_label(axes[r, c], letter)
-    lax = fig.add_subplot(gs[2, :])
+    lax = fig.add_subplot(gs[nr, :])
     lax.axis("off")
     order_h = [m for _, _, mets in families for m, *_ in mets]
     lax.legend([handles[m] for m in order_h] + [mpl.patches.Patch(color=band)],
                [LABELS[m] for m in order_h] + ["Primary setting"], loc="center", ncol=5, handletextpad=0.4,
                columnspacing=1.4, handlelength=1.4)
-    fg = gs[3, :].subgridspec(1, 2)
+    fg = gs[nr + 1, :].subgridspec(1, 2)
     ag = fig.add_subplot(fg[0, 0])
     ah = fig.add_subplot(fg[0, 1], sharey=ag)
     ypos, y_ = {}, 0.0
-    for an in ANALYSES:
+    for an in analyses:
         for a_, st in contrasts:
             if a_ == an:
                 ypos[(an, st)] = y_
@@ -228,8 +236,9 @@ def figure7(ctx, settings, contrasts, sens_delta, fold_values, n_folds, model) -
             if np.isfinite(r.p_holm) and r.p_holm < cfg.alpha:
                 ax.annotate("*", (r.hi if np.isfinite(r.hi) else r["diff"], y0), xytext=(2, -1),
                             textcoords="offset points", va="center", fontsize=8)
-        sep = max(v for (a_, _), v in ypos.items() if a_ == ANALYSES[0]) + 0.8
-        ax.axhline(sep, color="#BBBBBB", lw=0.5, zorder=1)
+        if nr > 1:
+            sep = max(v for (a_, _), v in ypos.items() if a_ == analyses[0]) + 0.8
+            ax.axhline(sep, color="#BBBBBB", lw=0.5, zorder=1)
         ax.set_xlabel(xlabel)
         ax.grid(axis="x", lw=0.4, color=GRID)
         ax.set_axisbelow(True)
@@ -240,15 +249,17 @@ def figure7(ctx, settings, contrasts, sens_delta, fold_values, n_folds, model) -
     ag.set_ylim(max(ypos.values()) + 0.6, -0.6)
     ag.tick_params(axis="y", length=0)
     ah.tick_params(axis="y", labelleft=False, length=0)
-    panel_label(ag, "g")
-    panel_label(ah, "h")
+    lg = "gh" if nr == 2 else "de"
+    panel_label(ag, lg[0])
+    panel_label(ah, lg[1])
+    what = ("a–c Prediction horizon and d–f imbalance handling" if nr == 2 else "a–c Imbalance handling")
     ctx.rep.save_figure(
         fig, "Fig7_sensitivity",
         f"Fig. 7 Prespecified sensitivity analyses for {dn(model)} in profile-grouped cross-validation on the "
-        f"development set ({n_folds} folds). a–c Prediction horizon and d–f imbalance handling: discrimination "
+        f"development set ({n_folds} folds). {what}: discrimination "
         "(macro-F1, Matthews correlation coefficient and macro AUC), recall by class, and calibration error (class-wise "
         "ECE and ECE for Enrolled; lower is better). Light dots, individual folds; markers and whiskers, mean ± SD; "
-        "shaded column, primary setting. g, h Paired differences between each setting and the primary setting in "
-        f"macro-F1 and class-wise ECE with Nadeau–Bengio corrected 95% CIs; shaded band in g, practical margin "
+        f"shaded column, primary setting. {lg[0]}, {lg[1]} Paired differences between each setting and the primary setting in "
+        f"macro-F1 and class-wise ECE with Nadeau–Bengio corrected 95% CIs; shaded band in {lg[0]}, practical margin "
         f"(± {cfg.practical_margin_f1m:.2f}); * Holm-adjusted p < 0.05 (Table S10). The model was re-tuned and "
         "re-calibrated within every training fold. AUC, area under the ROC curve; ECE, expected calibration error")

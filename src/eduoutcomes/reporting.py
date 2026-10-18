@@ -20,6 +20,13 @@ from .style import COL_MM, MAX_H_MM, MM, align_panel_labels, min_font
 log = logging.getLogger(__name__)
 
 
+def _with_scenario(text: str, scen: str) -> str:
+    """Añade a notas y leyendas el escenario temporal de predicción (v3.0), una sola vez."""
+    if not scen or scen in text:
+        return text
+    return f"{text.rstrip('. ')}. {scen}" if text else scen
+
+
 @dataclass
 class Reporter:
     cfg: Config
@@ -27,6 +34,7 @@ class Reporter:
     tables: list[dict] = field(default_factory=list)
     captions: dict[str, str] = field(default_factory=dict)
     figure_qa: list[dict] = field(default_factory=list)
+    scenario_note: str = ""
 
     # ------------------------------------------------------------------------------- tablas
     def register_table(self, df: pd.DataFrame, key: str, number: str, title: str, note: str = "",
@@ -39,6 +47,7 @@ class Reporter:
         """
         folder = self.paths.supplementary if supplementary else self.paths.tables
         df = df.reset_index(drop=True)
+        note = _with_scenario(note, self.scenario_note)
         df.to_csv(folder / f"{key}.csv", index=False, encoding="utf-8-sig")
         self.tables = [t for t in self.tables if t["key"] != key]   # re-ejecución idempotente
         self.tables.append(dict(df=df.copy(), key=key, number=number, title=title, note=note,
@@ -52,6 +61,7 @@ class Reporter:
     def save_figure(self, fig, stem: str, caption: str, supplementary: bool = False) -> None:
         """Guarda PDF/EPS vectoriales (fuentes incrustadas), TIFF RGB LZW y PNG; registra el control de calidad."""
         align_panel_labels(fig)
+        caption = _with_scenario(caption, self.scenario_note)
         folder = self.paths.supplementary if supplementary else self.paths.figures
         w_mm, h_mm = (fig.get_size_inches() / MM).round(1)
         for ext in self.cfg.fig_formats:

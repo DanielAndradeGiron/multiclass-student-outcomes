@@ -99,4 +99,5 @@ def run(ctx) -> None:
     pc = ctx.oof_df[[f"p_{c}" for c in CLASSES]].to_numpy()
     assert np.allclose(pc.sum(1), 1, atol=1e-6) and (pc >= 0).all(), "Invalid probability vectors"
     ctx.oof_df.to_csv(ctx.paths.metadata / "nested_cv_oof_predictions.csv.gz", index=False)
+    ctx.fold_df.to_csv(ctx.paths.metadata / "nested_cv_fold_metrics.csv", index=False)   # para comparar escenarios
     log.info("\n%s", ctx.FP.groupby("model")[["f1_macro", "mcc", "roc_auc_macro", "brier", "cw_ece"]].mean().round(3))

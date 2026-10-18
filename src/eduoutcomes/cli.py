@@ -46,6 +46,36 @@ def cmd_run(args) -> int:
     return 0
 
 
+def cmd_run_scenarios(args) -> int:
+    import matplotlib
+    cfg = _load(args)
+    matplotlib.use("Agg")
+    _setup_logging(args.verbose, Path(cfg.output_dir) / f"run_scenarios_{time.strftime('%Y%m%d_%H%M%S')}.log")
+    from .scenarios import run_scenarios
+    run_scenarios(cfg, until=args.until)
+    return 0
+
+
+def cmd_compare_scenarios(args) -> int:
+    import matplotlib
+    cfg = _load(args)
+    matplotlib.use("Agg")
+    _setup_logging(args.verbose)
+    from .scenarios import compare
+    compare(cfg)
+    return 0
+
+
+def cmd_temporal(args) -> int:
+    import matplotlib
+    cfg = _load(args)
+    matplotlib.use("Agg")
+    _setup_logging(args.verbose, Path(cfg.output_dir) / f"temporal_{time.strftime('%Y%m%d_%H%M%S')}.log")
+    from .temporal import run_temporal
+    run_temporal(cfg)
+    return 0
+
+
 def cmd_download(args) -> int:
     _setup_logging(args.verbose)
     from .constants import REFERENCE_SHA256
@@ -97,6 +127,21 @@ def build_parser() -> argparse.ArgumentParser:
     _add_config_args(p)
     p.add_argument("--until", default=None, help="stop after this stage (see `eduoutcomes stages`)")
     p.set_defaults(func=cmd_run)
+
+    p = sub.add_parser("run-scenarios", help="run every temporal prediction scenario (T0-strict, T0, T1, T2) and "
+                                             "compare them")
+    _add_config_args(p)
+    p.add_argument("--until", default=None, help="stop each scenario after this stage (no comparison)")
+    p.set_defaults(func=cmd_run_scenarios)
+
+    p = sub.add_parser("compare-scenarios", help="compare already-run scenarios (Tables 10–12, S12–S13, Fig. 8)")
+    _add_config_args(p)
+    p.set_defaults(func=cmd_compare_scenarios)
+
+    p = sub.add_parser("temporal-validation", help="exploratory rolling-origin validation by inferred cohort "
+                                                   "(development set only; run the scenarios first)")
+    _add_config_args(p)
+    p.set_defaults(func=cmd_temporal)
 
     p = sub.add_parser("download-data", help="download UCI 697 and verify its SHA-256")
     p.add_argument("--dest", default="data/raw/data.csv")

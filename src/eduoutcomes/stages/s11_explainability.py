@@ -168,7 +168,7 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
         try:
             lime = lime_mod.LimeTabularExplainer(
                 nv.to_num(X_dev).values, feature_names=COLS, class_names=list(CLASSES),
-                categorical_features=[COLS.index(c) for c in NOMINAL + BINARY], mode="classification",
+                categorical_features=[COLS.index(c) for c in NOMINAL + BINARY if c in COLS], mode="classification",
                 random_state=SEED, discretize_continuous=True)
             for i in cases:
                 x = nv.to_num(X_hold.iloc[[i]]).values[0]
@@ -211,6 +211,7 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
     # --- Tabla 8: predictores más influyentes y concordancia entre métodos ---
     imp = imp.sort_values("shap" if "shap" in imp else "perm", ascending=False)
     ctx.imp = imp
+    imp.rename_axis("predictor").to_csv(ctx.paths.metadata / "importance_all.csv")
     top = imp.head(15)
     t8: dict = {"Predictor": top.index}
     if "shap" in top:
@@ -282,7 +283,7 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
         rep.register_table(
             pd.DataFrame(cross), "TableS8_cross_model_stability", "S8",
             "Stability of global importance across the best-performing frozen candidates (permutation importance, holdout)",
-            "Kendall τ over all 36 predictors and overlap of the top-10 predictors between the selected candidate and the "
+            f"Kendall τ over all {len(COLS)} predictors and overlap of the top-10 predictors between the selected candidate and the "
             "next-best candidates in nested cross-validation", supplementary=True)
 
     # --- Figura 5: SHAP por clase ---
@@ -342,6 +343,16 @@ def run(ctx) -> None:  # noqa: C901 — etapa larga pero lineal; se mantiene jun
         figure6(ctx, loc_shap, consistency, X_hold.iloc[CASE])
     if loc_lime is not None:
         figureS4_lime(ctx, loc_lime, consistency)
+    # --- v3.0: sensibilidad de LIME (post hoc, elegida en desarrollo, aplicada una vez a la reserva) ---
+    if cfg.lime_sensitivity and lime_mod is not None and len(lime_df):
+        try:
+            from ..lime_sensitivity import run as lime_sens_run
+            res = lime_sens_run(ctx, lime_mod, nv, f_proba, cases, CASE, SV_ALL, pos_of, lime_df)
+            expl["LIME sensitivity"] = (f"{res['chosen']} — {res['rule']}; holdout median R² "
+                                        f"{res['holdout_r2_median']:.3f}; Fig. 6 case R² {res['fig6_case_r2']:.3f}")
+        except Exception as e:  # noqa: BLE001
+            expl["LIME sensitivity"] = f"failed: {e!r}"
+            log.warning("LIME sensitivity failed: %r", e)
     (ctx.paths.metadata / "explainability_status.json").write_text(json.dumps(expl, indent=2), encoding="utf-8")
     log.info("Explainability: %s", expl)
 
