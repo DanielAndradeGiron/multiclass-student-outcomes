@@ -18,7 +18,10 @@ import yaml
 
 @dataclass
 class Config:
-    pipeline_version: str = "2.0"
+    pipeline_version: str = "3.0"
+    # --- escenario temporal de predicción (v3.0): T0_strict, T0, T1 o T2 (= 36 predictores, diseño v2.0) ---
+    scenario: str = "T2"
+    scenarios: tuple[str, ...] = ("T0_strict", "T0", "T1", "T2")   # los que ejecuta `run-scenarios`
     # --- datos y salidas ---
     data_path: str = "data/raw/data.csv"
     output_dir: str = "outputs"
@@ -69,6 +72,12 @@ class Config:
     lime_min_fidelity: float = 0.50
     lime_cases: int = 30
     lime_num_samples: int = 3000
+    # Sensibilidad de LIME (post hoc, declarada): configuraciones elegidas SOLO con estudiantes de desarrollo
+    lime_sensitivity: bool = True
+    lime_sensitivity_samples: int = 5000
+    lime_sensitivity_min_stability: float = 0.60
+    # --- validación temporal exploratoria (cohorte inferida; solo conjunto de desarrollo) ---
+    temporal_test_cohorts: tuple[int, ...] = (2015, 2016, 2017)
     # --- cómputo (no afectan a los resultados, solo al tiempo) ---
     n_jobs: int = -1
     n_workers: int = 0
@@ -170,6 +179,9 @@ def validate(cfg: Config) -> None:
     assert cfg.calibration_primary in cfg.calibration_methods, "Primary calibration must be evaluated"
     assert "uncalibrated" in cfg.calibration_methods, "'uncalibrated' is needed for the calibration contrasts"
     assert cfg.resampling in ("smotenc", "random_oversampling", "none")
+    from .constants import SCENARIOS
+    assert cfg.scenario in SCENARIOS, f"scenario must be one of {SCENARIOS}"
+    assert set(cfg.scenarios) <= set(SCENARIOS) and len(cfg.scenarios) >= 1
     assert set(cfg.calibration_methods) <= {"uncalibrated", "temperature", "isotonic", "dirichlet"}
     if cfg.expected_counts is not None:
         assert len(cfg.expected_counts) == 3

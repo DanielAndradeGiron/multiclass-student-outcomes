@@ -3,3 +3,7 @@
 *.png binary
 *.pdf binary
 *.joblib binary
+# Los datos deben conservarse byte a byte (CRLF original de la UCI): si git normaliza los finales de línea, el
+# SHA-256 deja de coincidir con la referencia (3ef126de…).
+*.csv -text
+*.csv.gz binary

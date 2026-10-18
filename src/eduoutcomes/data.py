@@ -16,8 +16,8 @@ import pandas as pd
 from sklearn.model_selection import StratifiedGroupKFold
 
 from .config import Config
-from .constants import (BINARY, CLASSES, IDX, K, N_COLUMNS, NOMINAL, REFERENCE_SHA256, SEM1_PREFIX, SEM2_PREFIX,
-                        TARGET, UCI_URL)
+from .constants import (BINARY, CLASSES, COHORT_BY_MACRO, IDX, K, MACRO, N_COLUMNS, NOMINAL, REFERENCE_SHA256,
+                        SEM1_PREFIX, SEM2_PREFIX, TARGET, UCI_URL, assert_temporal_integrity, scenario_predictors)
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +60,16 @@ def profile_codes(X: pd.DataFrame, cols: list[str] | None = None) -> np.ndarray:
     return np.unique(h, return_inverse=True)[1].ravel()
 
 
+def infer_cohort(df: pd.DataFrame) -> np.ndarray:
+    """Año de ingreso INFERIDO a partir de la combinación de variables macroeconómicas (−1 si no coincide).
+
+    Solo se usa para describir cohortes y para la validación temporal exploratoria; nunca como predictor.
+    """
+    key = df[MACRO].astype(float).round(2).itertuples(index=False, name=None)
+    lut = {tuple(round(v, 2) for v in k): yr for k, yr in COHORT_BY_MACRO.items()}
+    return np.array([lut.get(tuple(k), -1) for k in key], dtype=int)
+
+
 @dataclass
 class Dataset:
     df: pd.DataFrame
@@ -78,11 +88,19 @@ class Dataset:
     sha_match: bool
     profile_audit: pd.DataFrame
     split_manifest: dict = field(default_factory=dict)
+    scenario: str = "T2"
+    scenario_cols: list[str] = field(default_factory=list)
+    cohort: np.ndarray | None = None
 
     # --- vistas convenientes -------------------------------------------------------------------
     @property
     def cols(self) -> list[str]:
-        return self.pred_sets["End of first year (all)"]
+        """Predictores del escenario temporal activo (T2 = los 36 predictores del diseño v2.0)."""
+        return self.scenario_cols or self.pred_sets["End of first year (all)"]
+
+    @property
+    def cohort_dev(self) -> np.ndarray:
+        return self.cohort[self.dev_pos]
 
     @property
     def X_dev(self) -> pd.DataFrame:
@@ -187,16 +205,36 @@ def load_dataset(cfg: Config, metadata_dir: Path | None = None) -> Dataset:
     if not set(g_all[dev_pos]).isdisjoint(g_all[hold_pos]):
         raise AssertionError("A predictor profile appears in both development and holdout")
 
+    # Escenario temporal: la reserva y TODAS las particiones se construyen con los perfiles de los 36 predictores, de
+    # modo que son idénticas en todos los escenarios (diseño pareado). Se audita además el perfil del escenario.
+    scen = getattr(cfg, "scenario", "T2")
+    scen_cols = scenario_predictors(all_pred, scen)
+    assert_temporal_integrity(scen_cols, scen)
+    g_scen = profile_codes(df, scen_cols)
+    shared_scen = int(pd.Series(g_scen).value_counts().gt(1).sum())
+    cross_scen = len(set(g_scen[dev_pos]) & set(g_scen[hold_pos]))
+    profile_audit = pd.concat([profile_audit, pd.DataFrame([
+        {"Measure": f"Distinct profiles of the {len(scen_cols)} {scen} predictors",
+         "Value": f"{len(np.unique(g_scen)):,}"},
+        {"Measure": f"{scen} profiles shared by ≥ 2 records", "Value": f"{shared_scen:,}"},
+        {"Measure": f"{scen} profiles present in both development and holdout", "Value": f"{cross_scen:,}"}])],
+        ignore_index=True)
+    cohort = infer_cohort(df)
+
     ds = Dataset(df=df, all_pred=all_pred, sem1=sem1, sem2=sem2, pred_sets=pred_sets, X_all=X_all, y_all=y_all,
                  g_all=g_all, row_ids=df["_row_id"].to_numpy(), dev_pos=dev_pos, hold_pos=hold_pos, n_dup=n_dup,
-                 data_sha=data_sha, sha_match=sha_match, profile_audit=profile_audit)
+                 data_sha=data_sha, sha_match=sha_match, profile_audit=profile_audit, scenario=scen,
+                 scenario_cols=scen_cols, cohort=cohort)
     assert set(ds.dev_ids).isdisjoint(ds.hold_ids) and len(ds.dev_ids) + len(ds.hold_ids) == len(df)
     ds.split_manifest = {
         "n_total": len(df), "duplicates_removed": n_dup, "n_development": len(ds.y_dev), "n_holdout": len(ds.y_hold),
         "class_order": list(CLASSES),
         "dev_counts": dict(zip(CLASSES, map(int, np.bincount(ds.y_dev, minlength=K)))),
         "holdout_counts": dict(zip(CLASSES, map(int, np.bincount(ds.y_hold, minlength=K)))),
-        "holdout_ids_sha256": ds.holdout_hash(), "status": "HOLDOUT_LOCKED"}
+        "holdout_ids_sha256": ds.holdout_hash(), "status": "HOLDOUT_LOCKED",
+        "scenario": scen, "n_predictors": len(scen_cols), "predictors": scen_cols,
+        "scenario_profiles_in_dev_and_holdout": cross_scen,
+        "cohorts_inferred": {int(k): int(v) for k, v in zip(*np.unique(cohort, return_counts=True))}}
     if metadata_dir is not None:
         (metadata_dir / "split_manifest.json").write_text(json.dumps(ds.split_manifest, indent=2), encoding="utf-8")
         pd.DataFrame({"row_id": np.r_[ds.dev_ids, ds.hold_ids],
@@ -247,9 +285,8 @@ def make_synthetic(n: int = 900, seed: int = 0) -> pd.DataFrame:
         cols[f"{base} (grade)"] = np.where(approved > 0, np.round(np.clip(12 + ability + rng.normal(0, 1, n), 10, 18),
                                                                   4), 0.0)
         cols[f"{base} (without evaluations)"] = rng.poisson(0.15, n)
-    cols["Unemployment rate"] = rng.choice([7.6, 8.9, 9.4, 10.8, 11.1, 12.4, 12.7, 13.9, 15.5, 16.2], n)
-    cols["Inflation rate"] = rng.choice([-0.8, -0.3, 0.3, 0.5, 0.6, 1.4, 2.6, 2.8, 3.7], n)
-    cols["GDP"] = rng.choice([-4.06, -3.12, -1.7, -0.92, 0.32, 0.79, 1.74, 1.79, 2.02, 3.51], n)
+    macro = np.array(list(COHORT_BY_MACRO))[rng.integers(0, len(COHORT_BY_MACRO), n)]   # una cohorte por estudiante
+    cols["Unemployment rate"], cols["Inflation rate"], cols["GDP"] = macro[:, 0], macro[:, 1], macro[:, 2]
     df = pd.DataFrame(cols)
     df[TARGET] = np.array(CLASSES)[y]
     assert df.shape[1] == N_COLUMNS

@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from ..constants import BINARY, CLASSES, K, NOMINAL, short_name
+from ..constants import (BINARY, CLASSES, K, NOMINAL, SCENARIO_SHORT, SCENARIOS, availability_of, scenario_predictors,
+                         short_name)
 from ..formatting import fmt_p, num
 from ..style import OKABE_ITO, new_figure, tint
 
@@ -81,11 +82,12 @@ def figure1(ctx) -> None:
     X1, X2, X3 = 0.165, 0.50, 0.835
     Y1, Y2, Y3 = 0.84, 0.50, 0.16
     e = W_ / 2
-    _box(ax, (X1, Y1), f"UCI data set (n = {N:,})\n36 predictors\nDropout {cnt[0]:,} · Enrolled {cnt[1]:,}\n"
-                       f"Graduate {cnt[2]:,}", W_, H_)
+    _box(ax, (X1, Y1), f"UCI data set (n = {N:,})\nScenario {ds.scenario.replace('_', '-')}: {len(ds.cols)} predictors\n"
+                       f"Dropout {cnt[0]:,} · Enrolled {cnt[1]:,}\nGraduate {cnt[2]:,}", W_, H_)
     _box(ax, (X1, Y2), f"Development set\nn = {len(ds.y_dev):,}", W_, H_)
     _box(ax, (X1, Y3), f"Locked holdout\nn = {len(ds.y_hold):,}\nopened once", W_, H_, fc=hold_fc)
-    _box(ax, (X2, Y1), "Sensitivity analyses\nprediction horizon\nresampling strategy", W_, H_)
+    _box(ax, (X2, Y1), "Sensitivity analyses\n" + ("prediction horizon\n" if ds.scenario == "T2" else "")
+         + "resampling strategy", W_, H_)
     _box(ax, (X2, Y2), f"Repeated nested CV ({cfg.outer_splits} × {cfg.outer_repeats})\nLR reference · 6 ensembles\n"
                        "soft voting · stacking\nSMOTENC + calibration in folds", W_, H_)
     _box(ax, (X2, Y3), "Final fit on development set\nall candidates frozen\nbefore holdout", W_, H_)
@@ -128,17 +130,65 @@ def run(ctx) -> None:
         "Type": ["nominal" if c in NOMINAL else "binary" if c in BINARY else "quantitative" for c in ap],
         "Missing": [int(df[c].isna().sum()) for c in ap],
         "Unique values": [int(df[c].nunique()) for c in ap],
-        "Available at": ["end of 2nd semester" if c in ds.sem2 else "end of 1st semester" if c in ds.sem1
-                         else "enrolment" for c in ap],
+        "Time of measurement (declared)": [availability_of(c)[0] for c in ap],
+        "Certainty": [availability_of(c)[1] for c in ap],
+        "Source": [availability_of(c)[2] for c in ap],
+        "Admitted in scenarios": [", ".join(SCENARIO_SHORT[s] for s in SCENARIOS if c in scenario_predictors(ap, s))
+                                  for c in ap],
+        "In this run": ["yes" if c in ds.cols else "no" for c in ap],
         "Figure label": [short_name(c) for c in ap]})
-    rep.register_table(audit, "TableS1_data_audit", "S1", "Predictor audit: type, completeness and time of availability",
+    rep.register_table(audit, "TableS1_data_audit", "S1", "Predictor audit: type, completeness, time of measurement and "
+                       "prediction scenarios",
                        "Nominal predictors are integer-coded in the source file and were one-hot encoded within training "
                        f"folds (categories with < {cfg.min_category_frequency} training records pooled as infrequent). "
-                       "Time of availability follows the data descriptor (Realinho et al., 2022). Figure label: "
-                       "abbreviation used in the figures (CU1/CU2, curricular units in the first/second semester)",
+                       "Time of measurement follows the data descriptor (Realinho et al., 2022), which states that enrolment "
+                       "information includes demographic, socioeconomic and macroeconomic factors but does not give the "
+                       "date on which debtor status, tuition-fee status and scholarship status were recorded (certainty "
+                       "'unknown'); T0-strict therefore excludes them. Macroeconomic values are annual national "
+                       "indicators whose 10 distinct combinations match Portugal 2008–2017 (certainty 'inferred'). "
+                       "Scenarios: T0-strict ⊂ T0 (enrolment) ⊂ T1 (end of 1st semester) ⊂ T2 (end of 1st year); no "
+                       "scenario uses information recorded after its time of prediction. Figure label: abbreviation "
+                       "used in the figures (CU1/CU2, curricular units in the first/second semester)",
                        supplementary=True)
     rep.register_table(ds.profile_audit, "TableS2_profile_audit", "S2", "Audit of predictor-profile multiplicity",
                        "A profile is the full vector of the 36 predictors. All partitions (holdout, outer and inner "
                        "cross-validation, calibration and stacking folds) were grouped by profile so that identical "
                        "profiles never appear on both sides of a split", supplementary=True)
+    # v3.0 — cohortes inferidas (descriptivo, muestra completa) y relación de las variables de momento incierto con el
+    # rendimiento académico posterior (orientativo: no permite fechar la medición)
+    coh = pd.Series(ds.cohort, name="cohort")
+    rows = []
+    for yr in sorted(coh.unique()):
+        m = (coh == yr).to_numpy()
+        rows.append({"Inferred cohort": "unmatched" if yr < 0 else str(int(yr)), "Students": f"{int(m.sum()):,}",
+                     **{c: _pct(int((ds.y_all[m] == i).sum()), int(m.sum())) for i, c in enumerate(CLASSES)},
+                     "Unemployment rate (%)": num(df.loc[m, "Unemployment rate"].iloc[0], 1),
+                     "Inflation rate (%)": num(df.loc[m, "Inflation rate"].iloc[0], 1),
+                     "GDP growth (%)": num(df.loc[m, "GDP"].iloc[0], 2)})
+    tab = pd.crosstab(coh, ds.y_all)
+    chi2, p, *_ = stats.chi2_contingency(tab, correction=False)
+    rep.register_table(pd.DataFrame(rows), "TableS15_inferred_cohorts", "S15",
+                       "Academic outcome by enrolment cohort inferred from the macroeconomic predictors",
+                       "n (row %). The source does not report the year of enrolment; each of the 10 distinct combinations "
+                       "of unemployment rate, inflation rate and GDP growth matches one year of the Portuguese annual "
+                       "series 2008–2017 (PORDATA), which identifies the cohort. The mapping is an inference to be "
+                       f"verified against PORDATA/INE. Pearson χ² test of outcome by cohort: p = {fmt_p(p)}",
+                       supplementary=True)
+    rows = []
+    for c in ["Debtor", "Tuition fees up to date", "Scholarship holder"]:
+        for v in (0, 1):
+            m = (df[c] == v).to_numpy()
+            rows.append({"Predictor": c, "Value": "yes" if v else "no", "Students": f"{int(m.sum()):,}",
+                         "Dropout, %": num(100 * (ds.y_all[m] == 0).mean(), 1),
+                         "No CU approved in 1st semester, %": num(
+                             100 * (df.loc[m, "Curricular units 1st sem (approved)"] == 0).mean(), 1),
+                         "No CU approved in 2nd semester, %": num(
+                             100 * (df.loc[m, "Curricular units 2nd sem (approved)"] == 0).mean(), 1)})
+    rep.register_table(pd.DataFrame(rows), "TableS16_timing_uncertain_predictors", "S16",
+                       "Predictors with undocumented time of measurement: association with the outcome and with "
+                       "first-year academic results",
+                       "Full sample. Strong associations with later academic results are compatible with these statuses "
+                       "having been recorded after enrolment (temporal leakage, possibly reverse causality), but cannot "
+                       "date the measurement; hence T0 is reported with (T0) and without (T0-strict) them. CU, curricular "
+                       "units", supplementary=True)
     figure1(ctx)

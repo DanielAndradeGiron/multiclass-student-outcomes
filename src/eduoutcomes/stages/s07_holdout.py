@@ -51,6 +51,9 @@ def run(ctx) -> None:
                   **{f"{best}_p_{c}": P_best[:, i] for i, c in enumerate(CLASSES)},
                   **{f"LR_p_{c}": P_ref[:, i] for i, c in enumerate(CLASSES)}}
                  ).to_csv(ctx.paths.metadata / "holdout_predictions.csv", index=False)
+    pd.DataFrame({"row_id": ds.hold_ids, "observed": y_hold,
+                  **{f"{m}|p_{c}": PH[m][:, i] for m in fac.model_names for i, c in enumerate(CLASSES)}}
+                 ).to_csv(ctx.paths.metadata / "holdout_predictions_all_models.csv.gz", index=False)
     MH = {m: mc_metrics(y_hold, PH[m], cfg.ece_bins) for m in fac.model_names}
     CH = {m: cal_lr_metrics(y_hold, PH[m]) for m in (best, REF)}
     ctx.MH, ctx.CH = MH, CH
@@ -101,7 +104,9 @@ def run(ctx) -> None:
         f"95% CIs from {cfg.holdout_bootstrap:,} bootstrap resamples stratified by class, conditional on the frozen models "
         "(percentile method); Δ from paired resamples. Classes assigned by the highest calibrated probability. For Brier "
         "score, log-loss and ECE, lower is better. Calibration intercept (calibration-in-the-large) and slope from a "
-        "one-vs-rest logistic recalibration of logit(p) (Van Calster et al., 2019). ECE, expected calibration error; MCC, "
+        "one-vs-rest logistic recalibration of logit(p) (Van Calster et al., 2019). ECE is positively biased in bootstrap "
+        "resamples (sampling noise adds apparent miscalibration), so its percentile interval may lie above the point "
+        "estimate; paired Δ are less affected. ECE, expected calibration error; MCC, "
         "Matthews correlation coefficient", landscape=True, group_col="Section")
     figure3(ctx)
 

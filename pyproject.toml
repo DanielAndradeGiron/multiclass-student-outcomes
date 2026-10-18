@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "eduoutcomes"
-version = "2.0.0"
+version = "3.0.0"
 description = "Calibrated and explainable benchmarking of ensemble and meta-ensemble learning for multiclass prediction of student academic outcomes (UCI 697)."
 readme = "README.md"
 requires-python = ">=3.10"

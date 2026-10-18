@@ -53,3 +53,16 @@ configuración, rejillas, huella de los datos y versiones de librerías. Cambiar
 1. `constants.ENSEMBLE_NAMES` y `MODEL_OFFSET` (semilla fija), `DISPLAY`.
 2. `models.make_estimator` y `models.PARAM_GRIDS`.
 3. Ejecuta `pytest`; la caché se invalida sola porque la lista de modelos forma parte de la clave.
+
+## v3.0 — escenarios temporales
+
+| Módulo | Contenido |
+|---|---|
+| `constants.py` | `SCENARIOS`, `scenario_predictors`, `assert_temporal_integrity`, `TIMING_UNCERTAIN`, `COHORT_BY_MACRO` |
+| `data.py` | `Dataset.cols` = predictores del escenario; reserva y particiones con los perfiles de los 36 predictores (idénticas en todos los escenarios); cohorte inferida |
+| `scenarios.py` | `run_scenarios` y `compare` (Tablas 10–12, S12–S13, Fig. 8) |
+| `temporal.py` | validación temporal exploratoria por cohorte inferida (Tabla S14; solo desarrollo) |
+| `lime_sensitivity.py` | sensibilidad de LIME elegida en desarrollo (Tabla S11) |
+
+Garantía adicional: `assert_temporal_integrity` se comprueba al cargar los datos y como puerta de calidad final
+(`no_predictor_after_prediction_time`); `holdout_identical_to_v2_0` verifica la huella de la reserva.

@@ -9,8 +9,8 @@ import numpy as np
 from scipy import stats
 from scipy.special import expit
 from scipy.stats import beta as beta_dist
-from sklearn.metrics import (accuracy_score, balanced_accuracy_score, cohen_kappa_score, f1_score, matthews_corrcoef,
-                             precision_score, recall_score, roc_auc_score)
+from sklearn.metrics import (accuracy_score, average_precision_score, balanced_accuracy_score, cohen_kappa_score,
+                             f1_score, matthews_corrcoef, precision_score, recall_score, roc_auc_score)
 
 from .constants import CLASSES, K
 
@@ -51,6 +51,20 @@ def auc_binary(yk, s) -> float:
     return float((r[yk].sum() - n1 * (n1 + 1) / 2) / (n1 * n0))
 
 
+def ap_binary(yk, s) -> float:
+    """Precisión media (área bajo la curva precisión–exhaustividad escalonada; idéntica a ``average_precision_score``)."""
+    yk = np.asarray(yk).astype(float)
+    if yk.sum() == 0:
+        return np.nan
+    o = np.argsort(-np.asarray(s, float), kind="mergesort")
+    ss, ys = np.asarray(s, float)[o], yk[o]
+    th = np.r_[np.where(np.diff(ss))[0], len(ss) - 1]
+    tps = np.cumsum(ys)[th]
+    prec = tps / (th + 1)
+    rec = tps / tps[-1]
+    return float(np.sum(np.diff(np.r_[0.0, rec]) * prec))
+
+
 def mc_metrics(y, P, ece_bins: int = DEFAULT_ECE_BINS) -> dict[str, float]:
     """Todas las métricas de discriminación y calibración de un vector de probabilidades (n × K)."""
     y = np.asarray(y).astype(int)
@@ -79,8 +93,13 @@ def mc_metrics(y, P, ece_bins: int = DEFAULT_ECE_BINS) -> dict[str, float]:
         "ece": ece_binary((z == y).astype(float), P.max(1), ece_bins),
     }
     eces = []
+    tn = s - t - p + tp
+    spec = np.divide(tn, tn + fp, out=np.zeros(K), where=(tn + fp) > 0)
+    aps = [ap_binary(y == k, P[:, k]) for k in range(K)]
+    out["pr_auc_macro"] = float(np.mean(aps)) if (t > 0).all() else np.nan
     for k, cl in enumerate(CLASSES):
         out[f"recall_{cl}"], out[f"precision_{cl}"], out[f"f1_{cl}"], out[f"auc_{cl}"] = rec[k], prec[k], f1[k], aucs[k]
+        out[f"spec_{cl}"], out[f"ap_{cl}"] = spec[k], aps[k]
         out[f"ece_{cl}"] = ece_binary(y == k, P[:, k], ece_bins)
         eces.append(out[f"ece_{cl}"])
     out["cw_ece"] = float(np.mean(eces))
@@ -105,6 +124,9 @@ def mc_metrics_sklearn(y, P) -> dict[str, float]:
         out[f"precision_{cl}"] = precision_score(yk, (z == k).astype(int), zero_division=0)
         out[f"f1_{cl}"] = f1_score(yk, (z == k).astype(int), zero_division=0)
         out[f"auc_{cl}"] = roc_auc_score(yk, P[:, k]) if 0 < yk.sum() < len(yk) else np.nan
+        out[f"ap_{cl}"] = average_precision_score(yk, P[:, k]) if yk.sum() > 0 else np.nan
+        out[f"spec_{cl}"] = recall_score(1 - yk, (z != k).astype(int), zero_division=0)
+    out["pr_auc_macro"] = float(np.mean([out[f"ap_{c}"] for c in CLASSES])) if full else np.nan
     return out
 
 
