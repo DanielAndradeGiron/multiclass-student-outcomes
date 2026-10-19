@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import time
 
+from matplotlib import rc
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, roc_curve
@@ -30,8 +32,8 @@ def _reliability_panel(ax, yb, pb, pbu, xlabel, cfg):
     ax.bar(e_[:-1], h_ / max(h_.max(), 1) * 0.12, width=0.05, align="edge", color=tint(C_REF, 0.35), lw=0, zorder=0)
     ru, rc = reliability_q(yb, pbu, cfg.reliability_bins), reliability_q(yb, pb, cfg.reliability_bins)
     ax.plot(ru[:, 0], ru[:, 1], "o--", color=C_REF, ms=3.2, mfc="white", mew=0.7, lw=0.7, label="Uncalibrated", zorder=2)
-    ax.errorbar(rc[:, 0], rc[:, 1], yerr=[rc[:, 1] - rc[:, 3], rc[:, 4] - rc[:, 1]], fmt="s-", color=C_POS, ms=3.2,
-                mec="black", mew=0.3, lw=0.9, elinewidth=0.6, capsize=1.2, label="Temperature scaling", zorder=3)
+    yerr_ = np.clip(np.nan_to_num([rc[:, 1] - rc[:, 3], rc[:, 4] - rc[:, 1]]), 0, None)
+    ax.errorbar(rc[:, 0], rc[:, 1], yerr=yerr_, fmt="s-", color=C_POS, ms=3.2,    mec="black", mew=0.3, lw=0.9, elinewidth=0.6, capsize=1.2, label="Temperature scaling", zorder=3)
     ax.set(xlabel=xlabel, ylabel="Observed frequency", xlim=(0, 1), ylim=(0, 1), aspect="equal")
     ax.set_xticks([0, 0.5, 1])
     ax.set_yticks([0, 0.5, 1])
